@@ -1,0 +1,39 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install and build
+        working-directory: app
+        run: |
+          bun install
+          bun run build
+        env:
+          NEXT_PUBLIC_RWA_TOKEN_ADDRESS: ""
+          NEXT_PUBLIC_COMPLIANCE_ENGINE_ADDRESS: ""
+          NEXT_PUBLIC_COUNTRY_RESTRICTION_ADDRESS: ""
+          NEXT_PUBLIC_FACTORY_ADDRESS: ""
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/out
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

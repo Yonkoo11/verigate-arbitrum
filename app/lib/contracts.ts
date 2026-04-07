@@ -23,7 +23,7 @@ export const addresses = {
   factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ?? "") as Address,
 };
 
-// BSC Testnet chain config
-export const BSC_TESTNET_CHAIN_ID = 97;
-export const BSC_TESTNET_RPC = "https://data-seed-prebsc-1-s1.bnbchain.org:8545";
-export const BSC_TESTNET_EXPLORER = "https://testnet.bscscan.com";
+// Arbitrum Sepolia chain config
+export const ARB_SEPOLIA_CHAIN_ID = 421614;
+export const ARB_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
+export const ARB_SEPOLIA_EXPLORER = "https://sepolia.arbiscan.io";

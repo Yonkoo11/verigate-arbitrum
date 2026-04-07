@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useReadContract } from "wagmi";
-import { addresses, complianceEngineAbi, rwaTokenAbi, BSC_TESTNET_EXPLORER } from "@/lib/contracts";
+import { addresses, complianceEngineAbi, rwaTokenAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
 
 const MODULE_ABI = [{ type: "function", name: "moduleInfo", inputs: [], outputs: [{ type: "string", name: "name" }, { type: "string", name: "description" }], stateMutability: "view" }] as const;
 
@@ -33,7 +33,7 @@ function ModuleRow({ address: addr }: { address: string }) {
         )}
       </div>
       <a
-        href={`${BSC_TESTNET_EXPLORER}/address/${addr}`}
+        href={`${ARB_SEPOLIA_EXPLORER}/address/${addr}`}
         target="_blank"
         rel="noopener noreferrer"
         style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-3)", textDecoration: "none" }}

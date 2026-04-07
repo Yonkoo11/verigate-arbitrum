@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits, isAddress, type Address } from "viem";
-import { addresses, rwaTokenAbi, complianceEngineAbi, BSC_TESTNET_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, complianceEngineAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
 import { useToast } from "./Toast";
 
 export function TransferForm() {
@@ -122,7 +122,7 @@ export function TransferForm() {
       {txHash && (
         <div style={{ padding: "var(--sp-3) var(--sp-4)", background: "var(--surface-2)", border: "1px solid var(--border)", marginBottom: "var(--sp-4)", fontSize: 13 }}>
           <span style={{ color: "var(--text-2)" }}>{confirming ? "Confirming..." : confirmed ? "Confirmed" : "Submitted"}</span>
-          <a href={`${BSC_TESTNET_EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
+          <a href={`${ARB_SEPOLIA_EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
             style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--amber)", marginLeft: 12, textDecoration: "none" }}>
             {txHash.slice(0, 10)}...{txHash.slice(-6)}
           </a>

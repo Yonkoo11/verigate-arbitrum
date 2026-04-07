@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { parseUnits, isAddress, type Address, toHex } from "viem";
-import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, BSC_TESTNET_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
 import { useToast } from "./Toast";
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -55,7 +55,7 @@ function Btn({ onClick, disabled, children, variant = "primary" }: { onClick: ()
 function TxLink({ hash }: { hash: string | undefined }) {
   if (!hash) return null;
   return (
-    <a href={`${BSC_TESTNET_EXPLORER}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
+    <a href={`${ARB_SEPOLIA_EXPLORER}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
       style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--amber)", textDecoration: "none" }}>
       {hash.slice(0, 10)}...{hash.slice(-6)}
     </a>

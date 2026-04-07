@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useConnect, useChainId, useSwitchChain } from "wagmi";
-import { bscTestnet } from "wagmi/chains";
+import { arbitrumSepolia } from "wagmi/chains";
 import { TokenDashboard } from "@/components/TokenDashboard";
 import { ComplianceStatus } from "@/components/ComplianceStatus";
 import { TransferForm } from "@/components/TransferForm";
@@ -62,16 +62,16 @@ function GateHero() {
         display: "flex", justifyContent: "center", gap: "var(--sp-6)", padding: "var(--sp-4)",
         borderTop: "1px solid var(--border)",
       }}>
-        <a href="https://github.com/Yonkoo11/verigate" target="_blank" rel="noopener noreferrer"
+        <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer"
           style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
           GitHub
         </a>
-        <a href="https://testnet.bscscan.com/address/0x60aa769416EfBbc0A6BC9cb454758dE6f76D52B5" target="_blank" rel="noopener noreferrer"
+        <a href="https://sepolia.arbiscan.io" target="_blank" rel="noopener noreferrer"
           style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-          BSCScan
+          Arbiscan
         </a>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
-          Built on BNB Chain
+          Built on Arbitrum
         </span>
       </div>
 
@@ -91,10 +91,10 @@ function GateHero() {
             Transfer Approved
           </h2>
           <p style={{ fontSize: 15, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>
-            All compliance modules passed. BAS attestation verified for both parties.
+            All compliance modules passed. EAS attestation verified for both parties.
           </p>
           <button
-            onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: bscTestnet.id })}
+            onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: arbitrumSepolia.id })}
             style={{ marginTop: 40, fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 500, color: "var(--black)", background: "var(--amber)", border: "none", padding: "14px 32px", cursor: "pointer", minHeight: 48, transition: "opacity var(--duration) var(--ease)" }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
@@ -110,7 +110,7 @@ function GateHero() {
 function WrongChainBanner() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  if (chainId === bscTestnet.id) return null;
+  if (chainId === arbitrumSepolia.id) return null;
   return (
     <div style={{
       background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.25)",
@@ -118,10 +118,10 @@ function WrongChainBanner() {
       alignItems: "center", justifyContent: "space-between",
     }}>
       <span style={{ fontSize: 14, color: "#f59e0b" }}>
-        You are connected to the wrong network. Switch to BSC Testnet to use Verigate.
+        You are connected to the wrong network. Switch to Arbitrum Sepolia to use Verigate.
       </span>
       <button
-        onClick={() => switchChain({ chainId: bscTestnet.id })}
+        onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
         style={{
           fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
           color: "var(--black)", background: "#f59e0b", border: "none",
@@ -158,14 +158,14 @@ function Dashboard() {
       {/* Footer */}
       <footer style={{ marginTop: "var(--sp-16)", paddingTop: "var(--sp-6)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--sp-4)" }}>
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 14, color: "var(--text-3)" }}>
-          Verigate — Compliance for tokenized RWA on BNB Chain
+          Verigate — Compliance for tokenized RWA on Arbitrum
         </span>
         <div style={{ display: "flex", gap: "var(--sp-5)" }}>
-          <a href="https://github.com/Yonkoo11/verigate" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
+          <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
             GitHub
           </a>
-          <a href="https://testnet.bscscan.com/address/0x60aa769416EfBbc0A6BC9cb454758dE6f76D52B5" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-            BSCScan
+          <a href="https://sepolia.arbiscan.io" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
+            Arbiscan
           </a>
         </div>
       </footer>

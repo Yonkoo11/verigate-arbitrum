@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
-import { bscTestnet } from "wagmi/chains";
+import { arbitrumSepolia } from "wagmi/chains";
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -11,12 +11,12 @@ export function WalletConnect() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
-  const wrongChain = isConnected && chainId !== bscTestnet.id;
+  const wrongChain = isConnected && chainId !== arbitrumSepolia.id;
 
-  // Auto-switch to BSC Testnet when connected on wrong chain
+  // Auto-switch to Arbitrum Sepolia when connected on wrong chain
   useEffect(() => {
     if (wrongChain && switchChain) {
-      switchChain({ chainId: bscTestnet.id });
+      switchChain({ chainId: arbitrumSepolia.id });
     }
   }, [wrongChain, switchChain]);
 
@@ -25,14 +25,14 @@ export function WalletConnect() {
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
         {wrongChain && (
           <button
-            onClick={() => switchChain({ chainId: bscTestnet.id })}
+            onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
             style={{
               fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
               color: "var(--black)", background: "#f59e0b", border: "none",
               padding: "8px 14px", cursor: "pointer", minHeight: 40,
             }}
           >
-            Switch to BSC Testnet
+            Switch to Arbitrum Sepolia
           </button>
         )}
         <div style={{
@@ -75,7 +75,7 @@ export function WalletConnect() {
 
   return (
     <button
-      onClick={() => connect({ connector: connectors[0], chainId: bscTestnet.id })}
+      onClick={() => connect({ connector: connectors[0], chainId: arbitrumSepolia.id })}
       disabled={isPending}
       style={{
         fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500,

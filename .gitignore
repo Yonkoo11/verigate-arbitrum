@@ -14,3 +14,13 @@ app/.env.example.local
 
 # OS
 .DS_Store
+ai/
+.ralph/
+.claude/
+application-answers.md
+Verigate-Pitch-Deck.pdf
+Verigate-Pitch-Deck.pptx
+video/
+proposals/
+docs/
+app/node_modules/

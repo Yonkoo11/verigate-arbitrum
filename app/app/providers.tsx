@@ -2,17 +2,17 @@
 
 import { type ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { bscTestnet } from "wagmi/chains";
+import { arbitrumSepolia } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { injected } from "wagmi/connectors";
 
 const queryClient = new QueryClient();
 
 export const config = createConfig({
-  chains: [bscTestnet],
+  chains: [arbitrumSepolia],
   connectors: [injected()],
   transports: {
-    [bscTestnet.id]: http("https://data-seed-prebsc-1-s1.bnbchain.org:8545"),
+    [arbitrumSepolia.id]: http("https://sepolia-rollup.arbitrum.io/rpc"),
   },
 });
 

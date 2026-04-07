@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: "export",
-  basePath: process.env.NODE_ENV === "production" ? "/verigate" : "",
+  basePath: process.env.NODE_ENV === "production" ? "/verigate-arbitrum" : "",
   images: { unoptimized: true },
 };
 

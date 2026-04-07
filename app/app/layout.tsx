@@ -6,7 +6,7 @@ import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "Verigate",
-  description: "Verify before you transfer. Compliance middleware for tokenized RWA on BNB Chain.",
+  description: "Verify before you transfer. Compliance middleware for tokenized RWA on Arbitrum.",
   icons: { icon: "/favicon.svg" },
   other: { "theme-color": "#0b0d11" },
 };

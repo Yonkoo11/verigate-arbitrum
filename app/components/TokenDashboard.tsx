@@ -2,7 +2,7 @@
 
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
-import { addresses, rwaTokenAbi, BSC_TESTNET_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
 
 export function TokenDashboard() {
   const { address } = useAccount();
@@ -84,7 +84,7 @@ export function TokenDashboard() {
         <MetaItem
           label="Compliance Engine"
           value={engine ? `${(engine as string).slice(0, 8)}...${(engine as string).slice(-6)}` : "—"}
-          href={engine ? `${BSC_TESTNET_EXPLORER}/address/${engine}` : undefined}
+          href={engine ? `${ARB_SEPOLIA_EXPLORER}/address/${engine}` : undefined}
         />
       </div>
     </Panel>
