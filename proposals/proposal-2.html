@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verigate — Design Proposal 2: The Checkpoint</title>
+
+<!-- UX ARCHITECTURE
+  ============================================================
+  CONCEPT: The entire interface is organized around a "gate" metaphor.
+  Every screen divides into two zones: unverified (cold, muted) and
+  verified (warm, amber). A vertical line acts as the literal gate
+  between states. This split is structural, not decorative.
+
+  LAYOUT DNA: A-H-S-D-S
+    A = Asymmetric layout (60/40 split, intentional imbalance)
+    H = Hidden navigation (floating brand mark only)
+    S = Split hero (unverified vs verified zones)
+    D = Duotone color (amber/gold + charcoal/slate)
+    S = Sans-serif distinctive (Space Grotesk + JetBrains Mono)
+
+  INFORMATION HIERARCHY:
+    1. Gate status (approved/denied) — the only thing that matters
+    2. Compliance data — attestation UIDs, module status
+    3. Actions — transfer, mint, freeze
+    4. Admin — issuer controls, country restrictions
+
+  INTERACTION MODEL:
+    - No modals. All state changes happen inline.
+    - Pre-check before transfer — user sees compliance result
+      before committing the transaction.
+    - Transitions max 150ms. No spring animations.
+
+  ACCESSIBILITY:
+    - All text meets WCAG AA on dark backgrounds
+    - Focus rings visible (amber outline)
+    - Semantic HTML structure
+    - Tab order follows visual flow: left panel → right panel
+  ============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Amber/Gold family */
+  --amber-100: #D4A574;
+  --amber-200: #C9A55C;
+  --amber-300: #b8944a;
+  --amber-400: #a68339;
+  --amber-muted: rgba(212, 165, 116, 0.15);
+  --amber-glow: rgba(201, 165, 92, 0.08);
+
+  /* Charcoal/Slate family */
+  --slate-900: #0f1117;
+  --slate-800: #1a1d27;
+  --slate-700: #252934;
+  --slate-600: #2f3440;
+  --slate-500: #3a404d;
+
+  /* Functional only */
+  --green: #10b981;
+  --coral: #f87171;
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-amber: rgba(212, 165, 116, 0.25);
+
+  /* Text */
+  --text-primary: #e8e0d4;
+  --text-secondary: rgba(232, 224, 212, 0.55);
+  --text-muted: rgba(232, 224, 212, 0.3);
+  --text-denied: rgba(255, 255, 255, 0.4);
+
+  /* Typography */
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Gate line */
+  --gate-width: 1px;
+  --gate-color: rgba(212, 165, 116, 0.2);
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--slate-900);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   DNA BADGE — fixed top-right
+   ============================================================ */
+.dna-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--amber-300);
+  background: var(--slate-800);
+  border: 1px solid var(--border-amber);
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   FLOATING BRAND MARK — hidden nav pattern
+   ============================================================ */
+.brand {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-monogram {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--amber-200);
+  letter-spacing: -0.02em;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-amber);
+  border-radius: 2px;
+  background: var(--slate-800);
+}
+
+.brand-text {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Hamburger — minimal, top-left under brand on mobile */
+.nav-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 60px;
+  z-index: 1000;
+  background: none;
+  border: 1px solid var(--border);
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 2px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 16px;
+  height: 1px;
+  background: var(--text-secondary);
+  margin: 3px 0;
+}
+
+/* ============================================================
+   HERO — THE SPLIT / THE GATE
+   ============================================================ */
+
+/* UX NOTE: The hero IS the product pitch. Left = what happens
+   without Verigate (blocked, cold). Right = what happens with
+   it (approved, warm). The gate line is the product itself. */
+
+.hero {
+  display: flex;
+  min-height: 70vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Unverified zone (left, 60%) --- */
+.hero-denied {
+  flex: 0 0 60%;
+  background: var(--slate-900);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px 80px 80px;
+  position: relative;
+}
+
+.hero-denied::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(15, 17, 23, 0.95), rgba(26, 29, 39, 0.8));
+  pointer-events: none;
+}
+
+.hero-denied > * { position: relative; z-index: 1; }
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero-denied .hero-label { color: var(--text-muted); }
+
+.hero-denied .hero-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.hero-denied .hero-icon svg { color: var(--coral); opacity: 0.7; }
+
+.hero-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.hero-denied .hero-title { color: var(--text-denied); }
+
+.hero-detail {
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.hero-denied .hero-detail { color: var(--text-muted); }
+
+.hero-denied .tx-preview {
+  margin-top: 32px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.tx-preview .tx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.tx-preview .tx-row + .tx-row { border-top: 1px solid var(--border); }
+
+.tx-label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.tx-value { font-family: var(--font-mono); font-size: 12px; }
+
+.hero-denied .tx-value { color: var(--text-denied); }
+
+.tx-status-denied {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--coral);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* --- Gate line (the product metaphor) --- */
+
+/* UX NOTE: This vertical line IS Verigate. It's the gate between
+   non-compliance and compliance. The rotated text labels it. */
+
+.gate-line {
+  position: absolute;
+  left: 60%;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+
+.gate-line::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: var(--gate-width);
+  background: var(--gate-color);
+  transform: translateX(-50%);
+}
+
+.gate-line::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--amber-200);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px rgba(201, 165, 92, 0.4);
+}
+
+.gate-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--amber-300);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  opacity: 0.6;
+  user-select: none;
+}
+
+/* --- Verified zone (right, 40%) --- */
+.hero-approved {
+  flex: 0 0 40%;
+  background: var(--slate-800);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px 80px 48px;
+  position: relative;
+}
+
+.hero-approved::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--amber-glow), rgba(201, 165, 92, 0.03));
+  pointer-events: none;
+}
+
+.hero-approved > * { position: relative; z-index: 1; }
+
+.hero-approved .hero-label { color: var(--amber-300); }
+
+.hero-approved .hero-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.hero-approved .hero-icon svg { color: var(--green); }
+
+.hero-approved .hero-title { color: var(--amber-100); }
+
+.hero-approved .hero-detail { color: var(--text-secondary); }
+
+.hero-approved .tx-preview {
+  margin-top: 32px;
+  padding: 16px;
+  background: var(--amber-muted);
+  border: 1px solid var(--border-amber);
+  border-radius: 2px;
+}
+
+.hero-approved .tx-value { color: var(--amber-100); }
+
+.tx-status-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* --- CTA centered below hero --- */
+.hero-cta {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.btn-connect {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--slate-900);
+  background: var(--amber-200);
+  border: none;
+  padding: 12px 32px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.btn-connect:hover { background: var(--amber-100); }
+.btn-connect:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 2px; }
+
+/* ============================================================
+   DASHBOARD — ASYMMETRIC TWO-PANEL
+   ============================================================ */
+
+/* UX NOTE: The dashboard maintains the split metaphor.
+   Left (wide) = data/status (what you know).
+   Right (narrow) = actions (what you do).
+   The gate line continues as a structural divider. */
+
+.dashboard {
+  display: flex;
+  position: relative;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard-data {
+  flex: 0 0 62%;
+  padding: 48px 48px 48px 80px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+/* Subtle gate continuation on the dashboard border */
+.dashboard::before {
+  content: 'GATE';
+  position: absolute;
+  left: 62%;
+  top: 24px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--amber-300);
+  opacity: 0.3;
+  z-index: 5;
+}
+
+.dashboard-actions {
+  flex: 0 0 38%;
+  padding: 48px 48px 48px 40px;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* --- Token Balance --- */
+.balance-block { margin-bottom: 40px; }
+
+.balance-amount {
+  font-family: var(--font-mono);
+  font-size: 42px;
+  font-weight: 600;
+  color: var(--amber-100);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-symbol {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+
+.balance-usd {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Compliance Status --- */
+.compliance-block { margin-bottom: 40px; }
+
+.compliance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.compliance-badge.verified {
+  color: var(--green);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.module-list { list-style: none; }
+
+.module-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.module-name { color: var(--text-secondary); }
+
+.module-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.module-status.active { color: var(--green); }
+.module-status.inactive { color: var(--text-muted); }
+
+/* --- Attestation --- */
+.attestation-block { margin-bottom: 16px; }
+
+.attestation-uid {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--amber-200);
+  word-break: break-all;
+  line-height: 1.6;
+  padding: 12px;
+  background: rgba(201, 165, 92, 0.04);
+  border: 1px solid var(--border-amber);
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.attestation-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.attestation-meta span { font-family: var(--font-mono); }
+
+/* --- Transfer Form (right panel) --- */
+.transfer-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.form-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--slate-700);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color 150ms;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-input::placeholder { color: var(--text-muted); }
+.form-input:focus { border-color: var(--amber-300); }
+.form-input:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 1px; }
+
+.form-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.btn-precheck {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--amber-200);
+  background: transparent;
+  border: 1px solid var(--border-amber);
+  padding: 10px 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.btn-precheck:hover { background: var(--amber-muted); }
+.btn-precheck:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 2px; }
+
+/* Pre-check result */
+.precheck-result {
+  padding: 12px;
+  border-radius: 2px;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.precheck-result.pass {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: var(--green);
+}
+
+.precheck-result .precheck-text { font-family: var(--font-mono); font-size: 11px; line-height: 1.5; }
+
+.btn-transfer {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--slate-900);
+  background: var(--amber-200);
+  border: none;
+  padding: 14px 24px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 150ms;
+  width: 100%;
+}
+
+.btn-transfer:hover { background: var(--amber-100); }
+.btn-transfer:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 2px; }
+
+/* ============================================================
+   ISSUER ADMIN — HORIZONTAL SECTIONS
+   ============================================================ */
+
+/* UX NOTE: Admin functions are below the fold, separated by
+   a strong border. These are issuer-only and less frequent.
+   Still maintains the gate line as a background element. */
+
+.admin {
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.admin-header {
+  padding: 32px 80px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.admin-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--amber-300);
+  background: var(--amber-muted);
+  border: 1px solid var(--border-amber);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* Vertical gate continuation */
+.admin::before {
+  content: '';
+  position: absolute;
+  left: 62%;
+  top: 0;
+  bottom: 0;
+  width: var(--gate-width);
+  background: var(--gate-color);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 24px;
+}
+
+.admin-section {
+  padding: 24px 32px;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.admin-section:last-child { border-right: none; }
+
+.admin-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.admin-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.admin-input {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--slate-700);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  border-radius: 2px;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-input:focus { border-color: var(--amber-300); }
+.admin-input:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 1px; }
+
+.btn-admin {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber-200);
+  background: var(--slate-600);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms;
+}
+
+.btn-admin:hover { background: var(--slate-500); }
+.btn-admin:focus-visible { outline: 2px solid var(--amber-200); outline-offset: 2px; }
+
+.btn-admin.destructive { color: var(--coral); border-color: rgba(248, 113, 113, 0.2); }
+.btn-admin.destructive:hover { background: rgba(248, 113, 113, 0.08); }
+
+/* --- Blocked countries chips --- */
+.country-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.country-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--amber-200);
+  border: 1px solid var(--border-amber);
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+}
+
+.admin-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-left {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.footer-right {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.6;
+}
+
+.footer-right .cite { color: var(--amber-300); opacity: 0.6; }
+
+/* ============================================================
+   RESPONSIVE — MOBILE COLLAPSE
+   ============================================================ */
+
+/* UX NOTE: On mobile, the gate line rotates to horizontal.
+   The split becomes top/bottom instead of left/right.
+   Single column layout. Asymmetry preserved via spacing. */
+
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .hero-denied, .hero-approved {
+    flex: none;
+    padding: 60px 24px;
+  }
+
+  .hero-denied { padding-top: 80px; }
+
+  /* Gate line becomes horizontal */
+  .gate-line {
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: 40px;
+    transform: none;
+  }
+
+  .gate-line::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    width: 100%;
+    height: var(--gate-width);
+    transform: translateY(-50%);
+  }
+
+  .gate-line::after {
+    left: 50%;
+    top: 50%;
+  }
+
+  .gate-text {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .hero-cta {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .dashboard-data, .dashboard-actions {
+    flex: none;
+    padding: 32px 24px;
+  }
+
+  .dashboard-data { border-right: none; border-bottom: 1px solid var(--border); }
+
+  .dashboard::before { display: none; }
+
+  .admin::before { display: none; }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-section { border-right: none; }
+
+  .admin-header { padding: 32px 24px 0; }
+
+  .footer {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .footer-right { text-align: center; }
+
+  .brand { left: 16px; top: 14px; }
+
+  .balance-amount { font-size: 32px; }
+
+  .nav-toggle { display: block; }
+}
+
+@media (max-width: 600px) {
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-input-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     DNA BADGE
+     ============================================================ -->
+<div class="dna-badge">DNA-A-H-S-D-S</div>
+
+<!-- ============================================================
+     FLOATING BRAND MARK — Hidden navigation pattern
+     Only the brand mark is visible. No nav links.
+     ============================================================ -->
+<div class="brand">
+  <div class="brand-monogram">VG</div>
+  <span class="brand-text">Verigate</span>
+</div>
+
+<button class="nav-toggle" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ============================================================
+     HERO — THE SPLIT
+     Left: DENIED state (cold, muted, restricted)
+     Right: APPROVED state (warm, amber, cleared)
+     Gate line divides them — the product itself
+     ============================================================ -->
+<section class="hero" aria-label="Product overview">
+
+  <!-- DENIED ZONE -->
+  <div class="hero-denied">
+    <div class="hero-label">Without Compliance Verification</div>
+    <div class="hero-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </div>
+    <h2 class="hero-title">Transfer Denied</h2>
+    <p class="hero-detail">No attestation found for recipient address. Transfer reverted by compliance module.</p>
+
+    <div class="tx-preview">
+      <div class="tx-row">
+        <span class="tx-label">From</span>
+        <span class="tx-value mono truncate">0x7a3b...4f2e</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">To</span>
+        <span class="tx-value mono truncate">0x9c1d...8a3b</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">Amount</span>
+        <span class="tx-value mono">50,000 vTSLA</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">Status</span>
+        <span class="tx-status-denied">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          REVERTED
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE GATE LINE -->
+  <div class="gate-line" role="separator" aria-label="Compliance gate">
+    <span class="gate-text">Verigate</span>
+  </div>
+
+  <!-- APPROVED ZONE -->
+  <div class="hero-approved">
+    <div class="hero-label">Compliance Verified via BAS</div>
+    <div class="hero-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2 class="hero-title">Transfer Approved</h2>
+    <p class="hero-detail">Attestation verified. KYC, accreditation, and jurisdiction checks passed.</p>
+
+    <div class="tx-preview">
+      <div class="tx-row">
+        <span class="tx-label">From</span>
+        <span class="tx-value mono truncate">0x7a3b...4f2e</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">To</span>
+        <span class="tx-value mono truncate">0x2e8f...1c7a</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">Amount</span>
+        <span class="tx-value mono">50,000 vTSLA</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-label">Status</span>
+        <span class="tx-status-approved">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          CONFIRMED
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="hero-cta">
+    <button class="btn-connect">Connect Wallet</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     DASHBOARD — ASYMMETRIC TWO-PANEL
+     Left (62%): Token data, compliance status, attestation
+     Right (38%): Transfer form with pre-check
+     Gate line continues as the structural border
+     ============================================================ -->
+<section class="dashboard" aria-label="Dashboard">
+
+  <!-- DATA SIDE (wide) -->
+  <div class="dashboard-data">
+    <div class="section-label">Portfolio & Compliance</div>
+
+    <!-- Token Balance -->
+    <div class="balance-block">
+      <div class="balance-amount">125,000<span class="balance-symbol">vTSLA</span></div>
+      <div class="balance-usd">$12,487,500.00 USD</div>
+    </div>
+
+    <!-- Compliance Status -->
+    <div class="compliance-block">
+      <div class="compliance-header">
+        <span class="section-label" style="margin-bottom:0">Compliance Modules</span>
+        <span class="compliance-badge verified">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          COMPLIANT
+        </span>
+      </div>
+
+      <ul class="module-list">
+        <li class="module-item">
+          <span class="module-name">KYC Verification</span>
+          <span class="module-status active mono">Active</span>
+        </li>
+        <li class="module-item">
+          <span class="module-name">Accredited Investor</span>
+          <span class="module-status active mono">Active</span>
+        </li>
+        <li class="module-item">
+          <span class="module-name">Country Restriction</span>
+          <span class="module-status active mono">Active</span>
+        </li>
+        <li class="module-item">
+          <span class="module-name">Transfer Cooldown</span>
+          <span class="module-status inactive mono">Not Required</span>
+        </li>
+        <li class="module-item">
+          <span class="module-name">Max Balance Cap</span>
+          <span class="module-status inactive mono">Not Required</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Attestation UID -->
+    <div class="attestation-block">
+      <div class="section-label">BAS Attestation</div>
+      <div class="attestation-uid">0xb4f7c2e8a1d3f5b6c9e0a2d4f6b8c1e3a5d7f9b2c4e6a8d0f2b4c6e8a0d2f4</div>
+      <div class="attestation-meta">
+        <span>Schema: <span class="mono" style="color:var(--amber-200)">0x8f2a...c4e1</span></span>
+        <span>Issued: <span class="mono">2026-03-28</span></span>
+        <span>Expires: <span class="mono">2027-03-28</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION SIDE (narrow) -->
+  <div class="dashboard-actions">
+    <div class="section-label">Transfer</div>
+
+    <form class="transfer-form" onsubmit="return false;">
+      <div class="form-group">
+        <label class="form-label" for="recipient">Recipient Address</label>
+        <input class="form-input" id="recipient" type="text" placeholder="0x..." spellcheck="false" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="amount">Amount</label>
+        <input class="form-input" id="amount" type="text" placeholder="0.00" inputmode="decimal">
+        <span class="form-hint">Available: <span class="mono">125,000</span> vTSLA</span>
+      </div>
+
+      <button class="btn-precheck" type="button">Pre-Check Compliance</button>
+
+      <!-- UX NOTE: Pre-check result appears BEFORE the transfer
+           button is enabled. User sees compliance status first. -->
+      <div class="precheck-result pass">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="precheck-text">
+          Recipient is verified.<br>
+          KYC: pass | Accredited: pass | Jurisdiction: US (allowed)
+        </div>
+      </div>
+
+      <button class="btn-transfer" type="submit">Execute Transfer</button>
+    </form>
+  </div>
+</section>
+
+<!-- ============================================================
+     ISSUER ADMIN — HORIZONTAL SECTIONS
+     Four functional blocks: Mint, Attestations, Freeze, Countries
+     Gate line persists as a background vertical element
+     ============================================================ -->
+<section class="admin" aria-label="Issuer administration">
+  <div class="admin-header">
+    <h2 class="admin-title">Issuer Admin</h2>
+    <span class="admin-badge">Owner Only</span>
+  </div>
+
+  <div class="admin-grid">
+    <!-- Mint -->
+    <div class="admin-section">
+      <div class="admin-section-title">Mint Tokens</div>
+      <div class="admin-input-row">
+        <input class="admin-input" type="text" placeholder="Recipient 0x..." spellcheck="false">
+      </div>
+      <div class="admin-input-row">
+        <input class="admin-input" type="text" placeholder="Amount" inputmode="decimal">
+        <button class="btn-admin">Mint</button>
+      </div>
+      <div class="admin-note">Mints to verified addresses only</div>
+    </div>
+
+    <!-- Attestations -->
+    <div class="admin-section">
+      <div class="admin-section-title">Attestations</div>
+      <div class="admin-input-row">
+        <input class="admin-input" type="text" placeholder="Address 0x..." spellcheck="false">
+      </div>
+      <div class="admin-input-row">
+        <input class="admin-input" type="text" placeholder="Country (US, DE...)" maxlength="2" style="max-width:80px">
+        <button class="btn-admin">Attest</button>
+      </div>
+      <div class="admin-note">Creates BAS on-chain attestation</div>
+    </div>
+
+    <!-- Freeze -->
+    <div class="admin-section">
+      <div class="admin-section-title">Freeze / Unfreeze</div>
+      <div class="admin-input-row">
+        <input class="admin-input" type="text" placeholder="Address 0x..." spellcheck="false">
+      </div>
+      <div class="admin-input-row">
+        <button class="btn-admin destructive">Freeze</button>
+        <button class="btn-admin">Unfreeze</button>
+      </div>
+      <div class="admin-note">Emergency compliance action</div>
+    </div>
+
+    <!-- Countries -->
+    <div class="admin-section">
+      <div class="admin-section-title">Blocked Countries</div>
+      <div class="country-chips">
+        <span class="country-chip">KP</span>
+        <span class="country-chip">IR</span>
+        <span class="country-chip">SY</span>
+      </div>
+      <div class="admin-input-row" style="margin-top:12px">
+        <input class="admin-input" type="text" placeholder="Code (e.g. RU)" maxlength="2" style="max-width:80px">
+        <button class="btn-admin">Block</button>
+        <button class="btn-admin destructive">Remove</button>
+      </div>
+      <div class="admin-note">ISO 3166-1 alpha-2 codes</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER — Inspiration citation
+     ============================================================ -->
+<footer class="footer">
+  <div class="footer-left">Verigate &mdash; Compliance middleware for tokenized real-world assets on BNB Chain</div>
+  <div class="footer-right">
+    <span class="cite">Design Inspiration:</span> Swiss International Style (asymmetric grid, mathematical precision)<br>
+    <span class="cite">Data Density:</span> Bloomberg Terminal (functional information hierarchy)
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verigate — Proposal 3: Banking Editorial</title>
+
+    <!-- UX ARCHITECTURE
+    =====================================================================
+    DNA: B-S-C-M-E (Bento, Side nav, Centered hero, Monochrome, Serif/Editorial)
+
+    INFORMATION HIERARCHY:
+    1. Hero (disconnected state) — single serif sentence, austere authority
+    2. Sidebar — persistent navigation, wallet identity anchor
+    3. Bento Dashboard (connected state) — varied cell sizes encode importance:
+       - Token Overview (LARGE) — the primary object the user manages
+       - Compliance Status (MEDIUM) — the gate that defines every action
+       - Transfer Form (MEDIUM) — the core action
+       - Active Modules (SMALL) — supporting configuration
+       - Blocked Countries (SMALL) — supporting configuration
+    4. Transfer Receipt — ephemeral confirmation, financial document pattern
+    5. Issuer Admin — collapsible power-user sections
+
+    DESIGN LANGUAGE:
+    - Newspaper/Editorial: column grids, serif authority, information density
+    - Stripe: polish, developer aesthetic, deep information architecture
+    - Metaphor: regulatory filing / financial broadsheet
+
+    INTERACTION MODEL:
+    - Sidebar anchors identity and navigation (always visible on desktop)
+    - Bento cells are scannable — no scrolling needed for primary data
+    - Transfer form is always one click away
+    - Admin sections collapse to reduce cognitive load for non-issuers
+    ===================================================================== -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Monochrome palette — 5 warm grays from near-black */
+            --black: #0C0C0E;
+            --gray-900: #141416;
+            --gray-800: #1C1C1F;
+            --gray-700: #252528;
+            --gray-500: #3A3A3E;
+            --gray-400: #52525B;
+            --gray-300: #71717A;
+            --gray-200: #A1A1AA;
+            --white: #FAFAFA;
+
+            /* ONE accent: old gold */
+            --gold: #C9A55C;
+            --gold-dim: rgba(201, 165, 92, 0.15);
+            --gold-hover: #D4B46A;
+
+            /* Semantic — only these two colors beyond monochrome */
+            --green: #22C55E;
+            --red: #EF4444;
+
+            /* Borders */
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+
+            /* Typography scale */
+            --font-serif: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+
+            /* Sidebar */
+            --sidebar-width: 200px;
+        }
+
+        html {
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--black);
+            color: var(--gray-200);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           DNA BADGE — fixed top-right identifier
+           ============================================================ */
+        .dna-badge {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            color: var(--gray-400);
+            background: var(--gray-900);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 0;
+        }
+
+        /* ============================================================
+           SIDEBAR — persistent vertical navigation
+           ============================================================ */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--black);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo h1 {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: -0.01em;
+        }
+
+        .sidebar-logo span {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--gray-400);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 24px;
+            color: var(--gray-300);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.15s, background 0.15s;
+            border-left: 2px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .sidebar-nav a.active {
+            color: var(--white);
+            border-left-color: var(--gold);
+            background: rgba(201, 165, 92, 0.04);
+        }
+
+        .sidebar-nav a svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav a.active svg {
+            opacity: 1;
+        }
+
+        .sidebar-wallet {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-wallet-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray-400);
+            margin-bottom: 4px;
+        }
+
+        .sidebar-wallet-address {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--gray-300);
+        }
+
+        .sidebar-wallet-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        /* ============================================================
+           MAIN CONTENT AREA — right of sidebar
+           ============================================================ */
+        .main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           HERO — disconnected state, centered serif authority
+           ============================================================ */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .hero-heading {
+            font-family: var(--font-serif);
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .hero-sub {
+            font-size: 15px;
+            color: var(--gray-400);
+            max-width: 400px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn-connect {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--black);
+            background: var(--gold);
+            border: none;
+            border-radius: 0;
+            padding: 12px 32px;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: background 0.15s;
+        }
+
+        .btn-connect:hover {
+            background: var(--gold-hover);
+        }
+
+        .btn-connect:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .hero-footnote {
+            margin-top: 32px;
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+
+        .hero-footnote a {
+            color: var(--gray-400);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        /* ============================================================
+           DASHBOARD — connected state, bento grid
+           ============================================================ */
+        /* (Hidden by default, shown via JS toggle) */
+        .dashboard {
+            display: none;
+            padding: 32px;
+        }
+
+        .dashboard.visible {
+            display: block;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dashboard-header h2 {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .dashboard-header-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--gray-400);
+        }
+
+        /* ============================================================
+           BENTO GRID — varied cell sizes encode information importance
+           ============================================================ */
+        .bento {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .bento-cell {
+            background: var(--gray-900);
+            padding: 28px;
+        }
+
+        /* Large cell: Token Overview spans 2 columns */
+        .bento-cell--large {
+            grid-column: 1 / -1;
+        }
+
+        /* Cell internal structure */
+        .cell-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .cell-heading {
+            font-family: var(--font-serif);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
+           TOKEN OVERVIEW — large bento cell
+           ============================================================ */
+        .token-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 32px;
+        }
+
+        .token-stat-label {
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-bottom: 6px;
+        }
+
+        .token-stat-value {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--gray-200);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .token-stat-value--gold {
+            color: var(--gold);
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .token-stat-value--large {
+            font-size: 15px;
+            color: var(--white);
+        }
+
+        .token-address {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--gray-400);
+            word-break: break-all;
+            margin-top: 4px;
+        }
+
+        .token-footnote {
+            font-size: 10px;
+            color: var(--gray-500);
+            margin-top: 6px;
+        }
+
+        /* ============================================================
+           COMPLIANCE STATUS — medium bento cell
+           ============================================================ */
+        .compliance-status {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .compliance-status--cleared {
+            color: var(--green);
+        }
+
+        .compliance-status--restricted {
+            color: var(--red);
+        }
+
+        .compliance-checks {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .compliance-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .compliance-check-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .compliance-check-dot--pass { background: var(--green); }
+        .compliance-check-dot--fail { background: var(--red); }
+
+        .compliance-uid {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--gray-500);
+            margin-top: 16px;
+            word-break: break-all;
+        }
+
+        .compliance-uid-label {
+            color: var(--gray-400);
+            font-family: var(--font-sans);
+        }
+
+        /* ============================================================
+           TRANSFER FORM — medium bento cell
+           ============================================================ */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
+
+        .form-input-wrap {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--gray-800);
+            border: 1px solid var(--border-strong);
+            border-radius: 0;
+            padding: 10px 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--white);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-500);
+        }
+
+        .form-input:focus {
+            border-color: var(--gold);
+        }
+
+        .form-input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        .form-input--with-suffix {
+            padding-right: 60px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            letter-spacing: 0.02em;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .btn--primary {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn--primary:hover {
+            background: var(--gold-hover);
+        }
+
+        .btn--secondary {
+            background: var(--gray-700);
+            color: var(--gray-200);
+        }
+
+        .btn--secondary:hover {
+            background: var(--gray-500);
+            color: var(--white);
+        }
+
+        .form-footnote {
+            font-size: 10px;
+            color: var(--gray-500);
+            margin-top: 10px;
+        }
+
+        /* ============================================================
+           ACTIVE MODULES — small bento cell
+           ============================================================ */
+        .module-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray-200);
+        }
+
+        .module-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .module-name {
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        /* ============================================================
+           BLOCKED COUNTRIES — small bento cell
+           ============================================================ */
+        .country-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .country-tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+            padding: 3px 8px;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            letter-spacing: 0.06em;
+        }
+
+        /* ============================================================
+           TRANSFER RECEIPT — financial document pattern
+           ============================================================ */
+        .receipt {
+            margin: 32px 0;
+            border: 1px solid var(--border-strong);
+            background: var(--gray-900);
+        }
+
+        .receipt-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .receipt-header h3 {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .receipt-header-status {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .receipt-header-status--success { color: var(--green); }
+        .receipt-header-status--failed { color: var(--red); }
+
+        .receipt-body {
+            padding: 0;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 12px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-row-label {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .receipt-row-value {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--gray-200);
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            word-break: break-all;
+            max-width: 60%;
+        }
+
+        .receipt-row-value--gold {
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           ISSUER ADMIN — collapsible sections
+           ============================================================ */
+        .admin-section {
+            margin-top: 32px;
+        }
+
+        .admin-section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .admin-section-header h3 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .admin-collapse-btn {
+            background: none;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .admin-collapse-btn:hover {
+            color: var(--white);
+        }
+
+        .admin-collapse-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .admin-collapsible {
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+        }
+
+        .admin-collapsible.collapsed {
+            max-height: 0 !important;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .admin-card {
+            background: var(--gray-900);
+            padding: 20px 24px;
+        }
+
+        .admin-card-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+            margin-bottom: 8px;
+        }
+
+        .admin-card-value {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--gray-200);
+        }
+
+        .admin-card-action {
+            margin-top: 12px;
+        }
+
+        .btn--small {
+            padding: 6px 14px;
+            font-size: 11px;
+        }
+
+        /* ============================================================
+           FOOTER — inspiration citation
+           ============================================================ */
+        .footer {
+            padding: 32px;
+            margin-top: 48px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .footer-citation {
+            font-size: 10px;
+            color: var(--gray-500);
+        }
+
+        .footer-citation em {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--gray-400);
+        }
+
+        .footer-version {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--gray-500);
+        }
+
+        /* ============================================================
+           STATE TOGGLE — show hero OR dashboard
+           ============================================================ */
+        .hero.hidden { display: none; }
+
+        /* ============================================================
+           RESPONSIVE — sidebar becomes bottom nav, bento single col
+           ============================================================ */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                border-right: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .sidebar-logo {
+                display: none;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                padding: 0;
+                flex: 1;
+            }
+
+            .sidebar-nav a {
+                flex: 1;
+                flex-direction: column;
+                gap: 4px;
+                padding: 10px 8px;
+                font-size: 10px;
+                text-align: center;
+                border-left: none;
+                border-top: 2px solid transparent;
+            }
+
+            .sidebar-nav a.active {
+                border-left-color: transparent;
+                border-top-color: var(--gold);
+            }
+
+            .sidebar-nav a span.nav-text {
+                display: block;
+            }
+
+            .sidebar-wallet {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                padding-bottom: 72px;
+            }
+
+            .bento {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-cell--large {
+                grid-column: 1;
+            }
+
+            .token-overview {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 32px 20px;
+            }
+
+            .dashboard {
+                padding: 20px;
+            }
+
+            .receipt-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .receipt-row-value {
+                text-align: left;
+                max-width: 100%;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 8px;
+                padding: 20px;
+            }
+
+            .dna-badge {
+                top: 8px;
+                right: 8px;
+            }
+        }
+
+        /* ============================================================
+           ACCESSIBILITY
+           ============================================================ */
+        @media (prefers-reduced-motion: reduce) {
+            .admin-collapsible {
+                transition: none;
+            }
+        }
+
+        /* Skip link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--gold);
+            color: var(--black);
+            padding: 8px 16px;
+            z-index: 10000;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Focus styles for all interactive elements */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip navigation for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- DNA Badge — fixed identifier -->
+    <div class="dna-badge" aria-hidden="true">DNA-B-S-C-M-E</div>
+
+    <!-- ================================================================
+         SIDEBAR — persistent vertical navigation
+         200px, dark, serif logo, 4 nav items, wallet at bottom
+         ================================================================ -->
+    <nav class="sidebar" aria-label="Primary navigation">
+        <div class="sidebar-logo">
+            <h1>Verigate</h1>
+            <span>BNB Chain</span>
+        </div>
+
+        <div class="sidebar-nav" role="navigation">
+            <!-- Dashboard (active) -->
+            <a href="#" class="active" aria-current="page">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="1" width="6" height="6"/>
+                    <rect x="9" y="1" width="6" height="6"/>
+                    <rect x="1" y="9" width="6" height="6"/>
+                    <rect x="9" y="9" width="6" height="6"/>
+                </svg>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <!-- Transfer -->
+            <a href="#">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 8h14M11 4l4 4-4 4"/>
+                </svg>
+                <span class="nav-text">Transfer</span>
+            </a>
+
+            <!-- Modules -->
+            <a href="#">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="12" height="12" rx="0"/>
+                    <path d="M2 6h12M6 6v8"/>
+                </svg>
+                <span class="nav-text">Modules</span>
+            </a>
+
+            <!-- Admin -->
+            <a href="#">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="8" cy="8" r="3"/>
+                    <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+                </svg>
+                <span class="nav-text">Admin</span>
+            </a>
+        </div>
+
+        <div class="sidebar-wallet" id="sidebar-wallet" style="display: none;">
+            <div class="sidebar-wallet-label">Connected</div>
+            <div class="sidebar-wallet-address">
+                <span class="sidebar-wallet-dot" aria-hidden="true"></span>
+                0x7a3B...9f2E
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================================================================
+         MAIN CONTENT
+         ================================================================ -->
+    <main class="main" id="main-content">
+
+        <!-- ============================================================
+             HERO — disconnected state
+             Centered serif heading, austere and commanding
+             ============================================================ -->
+        <section class="hero" id="hero-section" aria-label="Connect wallet">
+            <h2 class="hero-heading">Verify. Then transfer.</h2>
+            <p class="hero-sub">
+                Compliance middleware for tokenized real-world assets.
+                Every transfer checked against BAS attestations on BNB Chain.
+            </p>
+            <button class="btn-connect" id="btn-connect" type="button" aria-label="Connect your wallet">
+                Connect Wallet
+            </button>
+            <p class="hero-footnote">
+                Requires <a href="#" aria-label="Learn about BNB Smart Chain wallets">BSC-compatible wallet</a>
+            </p>
+        </section>
+
+        <!-- ============================================================
+             DASHBOARD — connected state (hidden until wallet connects)
+             Bento grid with varied cell sizes
+             ============================================================ -->
+        <section class="dashboard" id="dashboard-section" aria-label="Dashboard">
+
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <span class="dashboard-header-meta">Block 41,283,091</span>
+            </div>
+
+            <!-- BENTO GRID
+                 Large: Token Overview (2 cols)
+                 Medium: Compliance Status | Transfer Form
+                 Small: Active Modules | Blocked Countries
+            -->
+            <div class="bento" role="grid" aria-label="Dashboard overview">
+
+                <!-- ============================
+                     LARGE CELL: Token Overview
+                     Spans full width (2 columns)
+                     ============================ -->
+                <div class="bento-cell bento-cell--large" role="gridcell">
+                    <div class="cell-label">Token Overview</div>
+                    <div class="token-overview">
+                        <div>
+                            <div class="token-stat-label">Balance</div>
+                            <div class="token-stat-value token-stat-value--gold" aria-label="Balance: 12,450.00 VGATE">
+                                12,450.00
+                            </div>
+                            <div class="token-footnote">Wallet balance at last confirmed block</div>
+                        </div>
+                        <div>
+                            <div class="token-stat-label">Token</div>
+                            <div class="token-stat-value token-stat-value--large">VeriGate Token</div>
+                            <div class="token-stat-value" style="margin-top: 2px;">VGATE</div>
+                            <div class="token-footnote">BEP-20 compliant</div>
+                        </div>
+                        <div>
+                            <div class="token-stat-label">Total Supply</div>
+                            <div class="token-stat-value" style="text-align: right;">100,000,000.00</div>
+                            <div class="token-address" style="text-align: right; margin-top: 8px;">
+                                Engine: 0x1a2B...8cDE
+                            </div>
+                            <div class="token-footnote" style="text-align: right;">
+                                Compliance engine contract
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================
+                     MEDIUM CELL: Compliance Status
+                     ============================ -->
+                <div class="bento-cell" role="gridcell">
+                    <div class="cell-label">Compliance Status</div>
+                    <div class="compliance-status compliance-status--cleared" aria-label="Status: Cleared">
+                        Cleared
+                    </div>
+
+                    <div class="compliance-checks" role="list" aria-label="Compliance checks">
+                        <div class="compliance-check" role="listitem">
+                            <span class="compliance-check-dot compliance-check-dot--pass" aria-hidden="true"></span>
+                            <span>BAS attestation valid</span>
+                        </div>
+                        <div class="compliance-check" role="listitem">
+                            <span class="compliance-check-dot compliance-check-dot--pass" aria-hidden="true"></span>
+                            <span>Account not frozen</span>
+                        </div>
+                        <div class="compliance-check" role="listitem">
+                            <span class="compliance-check-dot compliance-check-dot--pass" aria-hidden="true"></span>
+                            <span>Country check passed</span>
+                        </div>
+                    </div>
+
+                    <div class="compliance-uid">
+                        <span class="compliance-uid-label">Attestation UID: </span>
+                        0x8f3a...b71c9d2e4a6f
+                    </div>
+                </div>
+
+                <!-- ============================
+                     MEDIUM CELL: Transfer Form
+                     ============================ -->
+                <div class="bento-cell" role="gridcell">
+                    <div class="cell-label">Transfer</div>
+
+                    <form id="transfer-form" aria-label="Transfer tokens">
+                        <div class="form-group">
+                            <label class="form-label" for="recipient">Recipient Address</label>
+                            <input class="form-input" type="text" id="recipient"
+                                   placeholder="0x..." autocomplete="off"
+                                   aria-describedby="recipient-note">
+                            <div class="form-footnote" id="recipient-note">Must hold valid BAS attestation</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="amount">Amount</label>
+                            <div class="form-input-wrap">
+                                <input class="form-input form-input--with-suffix" type="text" id="amount"
+                                       placeholder="0.00" inputmode="decimal" autocomplete="off">
+                                <span class="form-input-suffix" aria-hidden="true">VGATE</span>
+                            </div>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn--primary" id="btn-transfer">Transfer</button>
+                            <button type="button" class="btn btn--secondary" id="btn-check">Check</button>
+                        </div>
+
+                        <div class="form-footnote" style="margin-top: 12px;">
+                            Compliance verified before execution
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ============================
+                     SMALL CELL: Active Modules
+                     ============================ -->
+                <div class="bento-cell" role="gridcell">
+                    <div class="cell-label">Active Modules</div>
+                    <ul class="module-list" aria-label="Active compliance modules">
+                        <li class="module-item">
+                            <span class="module-dot" aria-hidden="true"></span>
+                            <span class="module-name">CountryRestriction</span>
+                        </li>
+                        <li class="module-item">
+                            <span class="module-dot" aria-hidden="true"></span>
+                            <span class="module-name">AttestationGuard</span>
+                        </li>
+                        <li class="module-item">
+                            <span class="module-dot" aria-hidden="true"></span>
+                            <span class="module-name">TransferFreeze</span>
+                        </li>
+                    </ul>
+                    <div class="token-footnote" style="margin-top: 12px;">3 of 5 modules active</div>
+                </div>
+
+                <!-- ============================
+                     SMALL CELL: Blocked Countries
+                     ============================ -->
+                <div class="bento-cell" role="gridcell">
+                    <div class="cell-label">Blocked Jurisdictions</div>
+                    <div class="country-tags" aria-label="Blocked country codes">
+                        <span class="country-tag" aria-label="North Korea">KP</span>
+                        <span class="country-tag" aria-label="Iran">IR</span>
+                        <span class="country-tag" aria-label="Syria">SY</span>
+                    </div>
+                    <div class="token-footnote" style="margin-top: 12px;">
+                        OFAC sanctions list, updated weekly
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 TRANSFER RECEIPT — financial document pattern
+                 Shown after a transfer is submitted
+                 ============================================================ -->
+            <div class="receipt" id="receipt-section" role="region" aria-label="Transfer receipt">
+                <div class="receipt-header">
+                    <h3>Transfer Receipt</h3>
+                    <span class="receipt-header-status receipt-header-status--success">Confirmed</span>
+                </div>
+                <div class="receipt-body">
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">Date</span>
+                        <span class="receipt-row-value">2026-03-31 14:23:07 UTC</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">From</span>
+                        <span class="receipt-row-value">0x7a3B91cD45eF2b8A1d6C0e3F4a5B9c7D8E1f2A3B</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">To</span>
+                        <span class="receipt-row-value">0x4c2D83aE67bF9d1C5e0A3B6F8d2E7c4A9b1D5f3E</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">Amount</span>
+                        <span class="receipt-row-value receipt-row-value--gold">1,500.00 VGATE</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">Compliance</span>
+                        <span class="receipt-row-value" style="color: var(--green);">PASSED</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-row-label">Tx Hash</span>
+                        <span class="receipt-row-value">0xae47f...c39b2d</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 ISSUER ADMIN — collapsible power-user sections
+                 ============================================================ -->
+            <section class="admin-section" aria-label="Issuer administration">
+                <div class="admin-section-header">
+                    <h3>Issuer Administration</h3>
+                    <button class="admin-collapse-btn" data-target="admin-content"
+                            aria-expanded="true" aria-controls="admin-content">
+                        Collapse
+                    </button>
+                </div>
+
+                <div class="admin-collapsible" id="admin-content" style="max-height: 600px;">
+                    <div class="admin-grid">
+                        <div class="admin-card">
+                            <div class="admin-card-label">Freeze Account</div>
+                            <div class="admin-card-value" style="color: var(--gray-300); font-family: var(--font-sans); font-size: 12px;">
+                                Restrict an address from all transfers
+                            </div>
+                            <div class="admin-card-action">
+                                <input class="form-input" type="text" placeholder="0x..." style="margin-bottom: 8px;"
+                                       aria-label="Address to freeze">
+                                <button class="btn btn--secondary btn--small">Freeze</button>
+                            </div>
+                        </div>
+                        <div class="admin-card">
+                            <div class="admin-card-label">Module Management</div>
+                            <div class="admin-card-value" style="color: var(--gray-300); font-family: var(--font-sans); font-size: 12px;">
+                                Attach or remove compliance modules
+                            </div>
+                            <div class="admin-card-action">
+                                <input class="form-input" type="text" placeholder="Module address..." style="margin-bottom: 8px;"
+                                       aria-label="Module contract address">
+                                <div style="display: flex; gap: 1px;">
+                                    <button class="btn btn--primary btn--small" style="flex: 1;">Attach</button>
+                                    <button class="btn btn--secondary btn--small" style="flex: 1;">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-card">
+                            <div class="admin-card-label">Set Country Restriction</div>
+                            <div class="admin-card-value" style="color: var(--gray-300); font-family: var(--font-sans); font-size: 12px;">
+                                Block transfers to/from country code
+                            </div>
+                            <div class="admin-card-action">
+                                <input class="form-input" type="text" placeholder="Country code (e.g. KP)" style="margin-bottom: 8px;"
+                                       aria-label="Country code to restrict" maxlength="2">
+                                <button class="btn btn--secondary btn--small">Add Restriction</button>
+                            </div>
+                        </div>
+                        <div class="admin-card">
+                            <div class="admin-card-label">Token Identity</div>
+                            <div class="admin-card-value">
+                                <div style="font-family: var(--font-sans); font-size: 12px; color: var(--gray-300); margin-bottom: 8px;">
+                                    On-chain identity registry
+                                </div>
+                                <div style="font-size: 11px; color: var(--gray-400); margin-bottom: 4px;">Engine</div>
+                                <div style="font-family: var(--font-mono); font-size: 10px; word-break: break-all;">
+                                    0x1a2B3c4D5e6F7a8B9c0D1e2F3a4B5c6D7e8F9a0B
+                                </div>
+                                <div style="font-size: 11px; color: var(--gray-400); margin-top: 8px; margin-bottom: 4px;">Owner</div>
+                                <div style="font-family: var(--font-mono); font-size: 10px; word-break: break-all;">
+                                    0x7a3B91cD45eF2b8A1d6C0e3F4a5B9c7D8E1f2A3B
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================
+                 FOOTER — inspiration citation
+                 ============================================================ -->
+            <footer class="footer" role="contentinfo">
+                <div class="footer-citation">
+                    Design inspiration: <em>Newspaper/Editorial</em> + <em>Stripe</em>
+                </div>
+                <div class="footer-version">Proposal 3 of 3</div>
+            </footer>
+        </section>
+    </main>
+
+    <!-- ================================================================
+         INTERACTION LOGIC
+         Toggle between hero (disconnected) and dashboard (connected)
+         Collapsible admin sections
+         ================================================================ -->
+    <script>
+        // State toggle: hero ↔ dashboard
+        const btnConnect = document.getElementById('btn-connect');
+        const heroSection = document.getElementById('hero-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const sidebarWallet = document.getElementById('sidebar-wallet');
+
+        btnConnect.addEventListener('click', function() {
+            heroSection.classList.add('hidden');
+            dashboardSection.classList.add('visible');
+            sidebarWallet.style.display = 'block';
+        });
+
+        // Collapsible admin sections
+        document.querySelectorAll('.admin-collapse-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const target = document.getElementById(targetId);
+                const isCollapsed = target.classList.contains('collapsed');
+
+                if (isCollapsed) {
+                    target.classList.remove('collapsed');
+                    this.textContent = 'Collapse';
+                    this.setAttribute('aria-expanded', 'true');
+                } else {
+                    target.classList.add('collapsed');
+                    this.textContent = 'Expand';
+                    this.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        // Transfer button interaction (visual feedback only)
+        const btnTransfer = document.getElementById('btn-transfer');
+        if (btnTransfer) {
+            btnTransfer.addEventListener('click', function() {
+                const receipt = document.getElementById('receipt-section');
+                if (receipt) {
+                    receipt.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    receipt.style.borderColor = 'var(--gold)';
+                    setTimeout(function() {
+                        receipt.style.borderColor = '';
+                    }, 1500);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

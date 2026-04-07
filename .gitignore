@@ -1,0 +1,16 @@
+# Secrets
+.env
+.env.local
+contracts/.env
+
+# Build artifacts
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/dry-run/
+app/.next/
+app/node_modules/
+node_modules/
+app/.env.example.local
+
+# OS
+.DS_Store

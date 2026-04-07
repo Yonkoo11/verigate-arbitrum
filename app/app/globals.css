@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* ============================================================
+   VERIGATE DESIGN SYSTEM
+   Hybrid: P2 gate metaphor + P3 serif authority + P1 sizing
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Hover states for links */
+a:hover { opacity: 0.8; }
+
+/* Sharp inputs globally */
+input { border-radius: 0 !important; }
+
+
+:root {
+  /* Surfaces — warm charcoal progression */
+  --black: #0b0d11;
+  --surface-1: #12141a;
+  --surface-2: #1a1d25;
+  --surface-3: #23262f;
+  --surface-4: #2c303b;
+
+  /* Text — warm white, not pure white. All pass WCAG AA on --black */
+  --text-1: #ece6db;                      /* 13.5:1 — primary */
+  --text-2: rgba(236, 230, 219, 0.62);   /* 6.35:1 — secondary */
+  --text-3: rgba(236, 230, 219, 0.50);   /* 4.52:1 — muted (AA pass) */
+  --text-4: rgba(236, 230, 219, 0.40);   /* 3.29:1 — disabled (large text only) */
+
+  /* Accent — amber/gold for value only */
+  --amber: #C9A55C;
+  --amber-dim: rgba(201, 165, 92, 0.12);
+  --amber-border: rgba(201, 165, 92, 0.22);
+  --amber-hover: #d4b46a;
+  --amber-glow: rgba(201, 165, 92, 0.06);
+
+  /* Semantic */
+  --green: #34d399;
+  --green-dim: rgba(52, 211, 153, 0.1);
+  --green-border: rgba(52, 211, 153, 0.18);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.1);
+  --red-border: rgba(248, 113, 113, 0.18);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+
+  /* Typography */
+  --font-serif: 'Crimson Pro', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* Spacing — 4px grid */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 150ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--black);
+  color: var(--text-1);
+  line-height: 1.55;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Selection */
+::selection {
+  background: rgba(201, 165, 92, 0.25);
+  color: var(--text-1);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+input:focus {
+  border-color: var(--amber-border) !important;
+}
+
+input::placeholder {
+  color: var(--text-4);
+}
+
+/* ============================================================
+   LAYOUT COMPONENTS
+   ============================================================ */
+
+/* Gate Hero — split on desktop, stack on mobile */
+.gate-hero {
+  display: flex;
+  min-height: calc(100vh - 56px);
+  position: relative;
+}
+
+.gate-hero-denied {
+  flex: 0 0 58%;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 48px 80px 64px;
+  position: relative;
+}
+
+.gate-hero-approved {
+  flex: 0 0 42%;
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 64px 80px 48px;
+  position: relative;
+}
+
+.gate-line {
+  position: absolute;
+  left: 58%;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+
+.gate-line-bar {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--amber-border);
+  transform: translateX(-50%);
+}
+
+.gate-label {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0.45;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) translateY(-40px);
+  user-select: none;
+}
+
+/* Dashboard grid */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-6);
+}
+
+/* Admin row */
+.admin-row {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-end;
+}
+
+/* ============================================================
+   RESPONSIVE — mobile first fixes
+   ============================================================ */
+@media (max-width: 768px) {
+  .gate-hero {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .gate-hero-denied,
+  .gate-hero-approved {
+    flex: none;
+    padding: 48px 24px;
+  }
+
+  .gate-line {
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: 40px;
+    flex-direction: row;
+    transform: none;
+  }
+
+  .gate-line-bar {
+    width: 100%;
+    height: 1px;
+    top: 50%;
+    left: 0;
+    right: 0;
+    bottom: auto;
+  }
+
+  .gate-label {
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+    position: relative !important;
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .gate-hero-denied,
+  .gate-hero-approved {
+    padding: 36px 20px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

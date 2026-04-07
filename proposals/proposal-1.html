@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verigate — Compliance for Tokenized Real-World Assets</title>
+
+  <!-- UX ARCHITECTURE
+  =====================================================================
+  DNA Code: DNA-S-T-M-N-X
+  S = Single-column vertical flow
+  T = Top-fixed minimal header
+  M = Minimal hero (quick to content)
+  N = Neutral palette (dark grays + amber accent)
+  X = Mixed typography (serif headings, monospace data, sans labels)
+
+  INFORMATION HIERARCHY:
+  1. Header (persistent context: brand + network + wallet)
+  2. Hero (value prop when disconnected, collapses when connected)
+  3. Token Overview (what you hold)
+  4. Compliance Status (are you clear?)
+  5. Transfer Form (primary action)
+  6. Issuer Admin (power-user controls)
+
+  VISUAL LANGUAGE:
+  - Panels differentiated by background shade, not borders
+  - Amber (#C9A55C) = value, action, brand accent
+  - Emerald (#10b981) = verified, compliant, safe
+  - Red (#ef4444) = blocked, frozen, error
+  - 4-level text: primary > secondary > muted > disabled
+  - Serif headings = institutional authority
+  - Monospace = on-chain data, addresses, numbers
+  - All spacing on 4px grid
+
+  INTERACTION MODEL:
+  - Pre-check before transfer (non-destructive)
+  - Compliance result inline (no modals)
+  - Admin actions sectioned, not tabbed (all visible)
+  ===================================================================== -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      /* Surfaces */
+      --base: #09090b;
+      --surface: #18181b;
+      --elevated: #27272a;
+      --border-subtle: #27272a;
+
+      /* Text hierarchy (4 levels) */
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --text-disabled: #52525b;
+
+      /* Accent */
+      --amber: #C9A55C;
+      --amber-hover: #d4b06a;
+      --amber-muted: rgba(201, 165, 92, 0.12);
+
+      /* Semantic */
+      --verified: #10b981;
+      --verified-bg: rgba(16, 185, 129, 0.08);
+      --blocked: #ef4444;
+      --blocked-bg: rgba(239, 68, 68, 0.08);
+
+      /* Typography */
+      --font-serif: Georgia, 'Times New Roman', serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', 'Courier New', monospace;
+
+      /* Spacing (4px grid) */
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+      --sp-8: 32px;
+      --sp-10: 40px;
+      --sp-12: 48px;
+      --sp-16: 64px;
+
+      /* Radius */
+      --radius-none: 0px;
+      --radius-sm: 4px;
+
+      /* Transitions */
+      --ease-fast: 150ms ease-out;
+      --ease-normal: 200ms ease-out;
+    }
+
+    /* ===== BASE ===== */
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--base);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ===== DNA BADGE (fixed top-right) ===== */
+    .dna-badge {
+      position: fixed;
+      top: var(--sp-4);
+      right: var(--sp-4);
+      z-index: 1000;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--surface);
+      padding: var(--sp-1) var(--sp-2);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ===== HEADER ===== */
+    /* UX: Persistent context bar. Brand left, wallet right. Testnet badge for network awareness. */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 56px;
+      background: rgba(9, 9, 11, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-6);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .logo-mark {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .logo-text {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .testnet-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--amber);
+      background: var(--amber-muted);
+      padding: 2px var(--sp-2);
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .btn-connect {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--base);
+      background: var(--amber);
+      border: none;
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--ease-fast);
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-connect:hover { background: var(--amber-hover); }
+    .btn-connect:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .wallet-connected {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: var(--surface);
+      padding: var(--sp-2) var(--sp-3);
+      border-radius: var(--radius-sm);
+      min-height: 44px;
+    }
+
+    .wallet-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--verified);
+      flex-shrink: 0;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 80px var(--sp-6) var(--sp-16);
+    }
+
+    /* ===== HERO (disconnected state) ===== */
+    /* UX: Minimal hero. Serif heading sets institutional tone immediately.
+       Single CTA. No decorative elements. */
+    .hero {
+      padding: var(--sp-12) 0 var(--sp-10);
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: var(--sp-10);
+    }
+
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--sp-3);
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-8);
+      max-width: 480px;
+    }
+
+    .hero .btn-connect {
+      font-size: 15px;
+      padding: var(--sp-3) var(--sp-6);
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--sp-4);
+    }
+
+    .section-subtitle {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-3);
+    }
+
+    /* ===== PANELS ===== */
+    /* UX: Panels use background-color shifts only. No box-shadow, no hard borders.
+       This creates depth through value contrast, not decoration. */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-6);
+      margin-bottom: var(--sp-6);
+    }
+
+    .panel-inner {
+      background: var(--elevated);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-4);
+    }
+
+    .panel-inner + .panel-inner {
+      margin-top: var(--sp-3);
+    }
+
+    /* ===== TOKEN OVERVIEW ===== */
+    /* UX: Token identity and balance front-and-center. Monospace for all numerical data. */
+    .token-name {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: var(--sp-1);
+    }
+
+    .token-symbol {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .token-balance {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      margin: var(--sp-4) 0;
+    }
+
+    .token-balance-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-1);
+    }
+
+    .token-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-4);
+      margin-top: var(--sp-4);
+      padding-top: var(--sp-4);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .token-meta-item label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-1);
+    }
+
+    .token-meta-item span {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+    }
+
+    /* ===== STATUS INDICATORS ===== */
+    /* UX: Binary status. Green = clear. Red = blocked. No ambiguity. */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-3) 0;
+    }
+
+    .status-row + .status-row {
+      border-top: 1px solid rgba(39, 39, 42, 0.6);
+    }
+
+    .status-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .status-value {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .status-verified {
+      color: var(--verified);
+    }
+
+    .status-blocked {
+      color: var(--blocked);
+    }
+
+    .status-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== MODULE LIST ===== */
+    .module-list {
+      list-style: none;
+      margin-top: var(--sp-3);
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--elevated);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--sp-2);
+    }
+
+    .module-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--verified);
+      flex-shrink: 0;
+    }
+
+    .module-name {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .module-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    /* ===== FORM ELEMENTS ===== */
+    /* UX: Inputs are 16px minimum (prevents iOS zoom). Monospace for address fields. */
+    .form-group {
+      margin-bottom: var(--sp-4);
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-2);
+    }
+
+    .form-input {
+      width: 100%;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-primary);
+      background: var(--elevated);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: var(--sp-3) var(--sp-4);
+      outline: none;
+      transition: border-color var(--ease-fast);
+      min-height: 44px;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-disabled);
+    }
+
+    .form-input:focus {
+      border-color: var(--amber);
+    }
+
+    .form-input:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: -2px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-row {
+      display: flex;
+      gap: var(--sp-3);
+      margin-top: var(--sp-4);
+    }
+
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--sp-3) var(--sp-5);
+      cursor: pointer;
+      transition: all var(--ease-fast);
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: var(--base);
+    }
+    .btn-primary:hover { background: var(--amber-hover); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+    .btn-outline:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: var(--blocked-bg);
+      color: var(--blocked);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .btn-sm {
+      font-size: 13px;
+      padding: var(--sp-2) var(--sp-3);
+      min-height: 36px;
+    }
+
+    /* ===== COMPLIANCE RESULT ===== */
+    /* UX: Inline result display. No modals. Immediate feedback after pre-check. */
+    .compliance-result {
+      margin-top: var(--sp-4);
+      padding: var(--sp-4);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+    }
+
+    .compliance-pass {
+      background: var(--verified-bg);
+      color: var(--verified);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+
+    .compliance-fail {
+      background: var(--blocked-bg);
+      color: var(--blocked);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .compliance-result-icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .compliance-result-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ===== CHIPS ===== */
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-2);
+    }
+
+    .chip {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: var(--sp-1) var(--sp-3);
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.02em;
+    }
+
+    .chip-blocked {
+      background: var(--blocked-bg);
+      color: var(--blocked);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    /* ===== ADMIN SECTIONS ===== */
+    .admin-section {
+      padding: var(--sp-4) 0;
+    }
+
+    .admin-section + .admin-section {
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .admin-section-title {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-3);
+    }
+
+    .admin-row {
+      display: flex;
+      gap: var(--sp-3);
+      align-items: flex-end;
+    }
+
+    .admin-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* ===== DIVIDER ===== */
+    .section-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: var(--sp-10) 0;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: var(--sp-8) 0;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--sp-12);
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: var(--text-disabled);
+      line-height: 1.6;
+    }
+
+    .footer .inspiration {
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: var(--sp-2);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .main {
+        padding: 72px var(--sp-4) var(--sp-12);
+      }
+
+      .header {
+        padding: 0 var(--sp-4);
+      }
+
+      .logo-text { display: none; }
+
+      .panel { padding: var(--sp-4); }
+
+      .token-balance { font-size: 24px; }
+
+      .token-meta {
+        grid-template-columns: 1fr;
+        gap: var(--sp-3);
+      }
+
+      .btn-row {
+        flex-direction: column;
+      }
+
+      .admin-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .admin-row .btn { width: 100%; }
+
+      .module-desc { display: none; }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: 0ms !important; }
+    }
+
+    /* Focus ring for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    /* Selection */
+    ::selection {
+      background: rgba(201, 165, 92, 0.3);
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DNA BADGE -->
+  <div class="dna-badge" aria-hidden="true">DNA-S-T-M-N-X</div>
+
+  <!-- ===== HEADER =====
+       UX: Fixed header provides persistent brand + wallet context.
+       Testnet badge prevents mainnet confusion.
+       Wallet button is the only interactive element. -->
+  <header class="header" role="banner">
+    <div class="header-left">
+      <span class="logo-mark" aria-hidden="true">VG</span>
+      <span class="logo-text">Verigate</span>
+      <span class="testnet-badge">Testnet</span>
+    </div>
+    <div class="wallet-connected" role="status" aria-label="Wallet connected">
+      <span class="wallet-dot" aria-hidden="true"></span>
+      <span>0x7a3B...e91F</span>
+    </div>
+  </header>
+
+  <main class="main" role="main">
+
+    <!-- ===== HERO (disconnected state) =====
+         UX: Minimal hero. Serif heading immediately signals "institutional".
+         One line of description. One CTA. Nothing else.
+         This section would hide when wallet is connected. -->
+    <section class="hero" aria-label="Introduction">
+      <h1>Compliance for Tokenized Real-World Assets</h1>
+      <p>Every transfer verified against on-chain attestations. BNB Attestation Service integration for KYC, accreditation, and jurisdiction checks.</p>
+      <button class="btn-connect" type="button">Connect Wallet</button>
+    </section>
+
+
+    <!-- ===== TOKEN OVERVIEW =====
+         UX: Primary context. What token, how much, key addresses.
+         Balance in large monospace for scannability.
+         Meta grid for secondary data. -->
+    <section aria-label="Token Overview">
+      <h2 class="section-title">Token Overview</h2>
+      <div class="panel">
+        <div class="token-name">
+          Verigate Demo Token
+          <span class="token-symbol">(VGATE)</span>
+        </div>
+        <div>
+          <div class="token-balance-label">Your Balance</div>
+          <div class="token-balance">999,999.00</div>
+        </div>
+        <div class="token-meta">
+          <div class="token-meta-item">
+            <label>Total Supply</label>
+            <span>10,000,000.00</span>
+          </div>
+          <div class="token-meta-item">
+            <label>Compliance Engine</label>
+            <span>0x4F2e...8c3D</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===== COMPLIANCE STATUS =====
+         UX: Clear pass/fail for each compliance dimension.
+         Binary indicators. No ambiguous "pending" states.
+         Module list shows exactly which rules are active. -->
+    <section aria-label="Compliance Status" style="margin-top: var(--sp-6);">
+      <h2 class="section-title">Compliance Status</h2>
+      <div class="panel">
+        <div class="status-row">
+          <span class="status-label">BAS Attestation</span>
+          <span class="status-value status-verified">
+            <span class="status-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.3 4.3L6.5 11.1L2.7 7.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            Verified
+          </span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Frozen Status</span>
+          <span class="status-value status-verified">
+            <span class="status-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.3 4.3L6.5 11.1L2.7 7.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            Not Frozen
+          </span>
+        </div>
+
+        <div class="section-subtitle" style="margin-top: var(--sp-6);">Active Modules</div>
+        <ul class="module-list" aria-label="Active compliance modules">
+          <li class="module-item">
+            <span class="module-indicator" aria-hidden="true"></span>
+            <span class="module-name">CountryRestriction</span>
+            <span class="module-desc">Blocks sanctioned jurisdictions</span>
+          </li>
+          <li class="module-item">
+            <span class="module-indicator" aria-hidden="true"></span>
+            <span class="module-name">AccreditedInvestor</span>
+            <span class="module-desc">Requires investor attestation</span>
+          </li>
+          <li class="module-item">
+            <span class="module-indicator" aria-hidden="true"></span>
+            <span class="module-name">MaxHolders</span>
+            <span class="module-desc">Caps total holder count</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+
+    <!-- ===== TRANSFER FORM =====
+         UX: Primary action. Two-step: pre-check (non-destructive) then transfer.
+         Pre-check is outline button (secondary action).
+         Transfer is filled amber (primary action).
+         Results display inline, no modals. -->
+    <section aria-label="Transfer" style="margin-top: var(--sp-6);">
+      <h2 class="section-title">Transfer</h2>
+      <div class="panel">
+        <div class="form-group">
+          <label class="form-label" for="recipient">Recipient Address</label>
+          <input
+            class="form-input"
+            type="text"
+            id="recipient"
+            placeholder="0x..."
+            value="0x9bC1...4a2E"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="amount">Amount</label>
+          <input
+            class="form-input"
+            type="text"
+            id="amount"
+            placeholder="0.00"
+            value="1,000.00"
+            inputmode="decimal"
+          >
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" type="button">Pre-Check Compliance</button>
+          <button class="btn btn-primary" type="button">Transfer</button>
+        </div>
+
+        <!-- Compliance result: PASS state -->
+        <div class="compliance-result compliance-pass" role="status" aria-live="polite">
+          <span class="compliance-result-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12.5 6.5L7.8 11.2L5.5 8.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="compliance-result-text">Transfer is compliant. All module checks passed.</span>
+        </div>
+
+        <!-- Compliance result: FAIL state -->
+        <div class="compliance-result compliance-fail" role="alert" aria-live="assertive" style="margin-top: var(--sp-3);">
+          <span class="compliance-result-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6.5 6.5L11.5 11.5M11.5 6.5L6.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="compliance-result-text">Blocked: Recipient has no valid attestation. AccreditedInvestor module rejected the transfer.</span>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="section-divider"></div>
+
+
+    <!-- ===== ISSUER ADMIN =====
+         UX: Power-user section. All admin actions visible (no hidden tabs).
+         Each sub-section is a clear action group.
+         Country chips give immediate visual feedback on blocked jurisdictions. -->
+    <section aria-label="Issuer Administration">
+      <h2 class="section-title">Issuer Admin</h2>
+      <div class="panel">
+
+        <!-- Mint -->
+        <div class="admin-section">
+          <div class="admin-section-title">Mint Tokens</div>
+          <div class="admin-row">
+            <div class="form-group">
+              <label class="form-label" for="mint-to">Recipient</label>
+              <input class="form-input" type="text" id="mint-to" placeholder="0x..." autocomplete="off" spellcheck="false">
+            </div>
+            <div class="form-group" style="max-width: 160px;">
+              <label class="form-label" for="mint-amount">Amount</label>
+              <input class="form-input" type="text" id="mint-amount" placeholder="0.00" inputmode="decimal">
+            </div>
+            <button class="btn btn-primary btn-sm" type="button" style="flex-shrink: 0;">Mint</button>
+          </div>
+        </div>
+
+        <!-- Set Attestation -->
+        <div class="admin-section">
+          <div class="admin-section-title">Set Attestation</div>
+          <div class="admin-row">
+            <div class="form-group">
+              <label class="form-label" for="attest-addr">Address</label>
+              <input class="form-input" type="text" id="attest-addr" placeholder="0x..." autocomplete="off" spellcheck="false">
+            </div>
+            <button class="btn btn-primary btn-sm" type="button" style="flex-shrink: 0;">Set Attestation</button>
+          </div>
+        </div>
+
+        <!-- Freeze / Unfreeze -->
+        <div class="admin-section">
+          <div class="admin-section-title">Freeze / Unfreeze</div>
+          <div class="admin-row">
+            <div class="form-group">
+              <label class="form-label" for="freeze-addr">Address</label>
+              <input class="form-input" type="text" id="freeze-addr" placeholder="0x..." autocomplete="off" spellcheck="false">
+            </div>
+            <button class="btn btn-primary btn-sm" type="button" style="flex-shrink: 0;">Freeze</button>
+            <button class="btn btn-danger btn-sm" type="button" style="flex-shrink: 0;">Unfreeze</button>
+          </div>
+        </div>
+
+        <!-- Country Restrictions -->
+        <div class="admin-section">
+          <div class="admin-section-title">Country Restrictions</div>
+          <div class="section-subtitle">Blocked Jurisdictions</div>
+          <div class="chip-list" aria-label="Blocked countries">
+            <span class="chip chip-blocked" role="listitem">KP</span>
+            <span class="chip chip-blocked" role="listitem">IR</span>
+            <span class="chip chip-blocked" role="listitem">SY</span>
+          </div>
+          <div class="admin-row" style="margin-top: var(--sp-4);">
+            <div class="form-group">
+              <label class="form-label" for="country-code">Country Code (ISO 3166)</label>
+              <input class="form-input" type="text" id="country-code" placeholder="US" maxlength="2" style="max-width: 100px; text-transform: uppercase;">
+            </div>
+            <button class="btn btn-danger btn-sm" type="button" style="flex-shrink: 0;">Block Country</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer" role="contentinfo">
+      <p>Verigate. Compliance middleware for tokenized real-world assets on BNB Chain.</p>
+      <p class="inspiration">Design inspired by Linear.app (restraint, hierarchy) and Chainalysis (institutional authority).</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
