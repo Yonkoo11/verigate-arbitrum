@@ -88,7 +88,7 @@ export default function Landing() {
       <nav className="lp-nav">
         <Wordmark />
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
-          <Link href="/docs" className="btn btn-ghost btn-sm">Docs</Link>
+          <Link href="/integrate" className="btn btn-ghost btn-sm">Docs</Link>
           <Link href="/dashboard" className="btn btn-primary btn-sm">Launch app</Link>
         </div>
       </nav>
@@ -202,7 +202,7 @@ export default function Landing() {
         <div style={{ display: "flex", gap: "var(--sp-6)" }}>
           <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" className="mono-link">GitHub</a>
           <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer" className="mono-link">Explorer</a>
-          <Link href="/docs" className="mono-link">Docs</Link>
+          <Link href="/integrate" className="mono-link">Docs</Link>
         </div>
       </footer>
     </div>
