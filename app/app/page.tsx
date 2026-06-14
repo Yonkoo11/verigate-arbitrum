@@ -49,7 +49,7 @@ function GateHero() {
               <path d="M6 6l8 8M14 6l-8 8" stroke="var(--red)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
             Transfer reverted
           </h2>
           <p style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
@@ -84,7 +84,7 @@ function GateHero() {
                 <path d="M5 10l4 4 6-7" stroke="var(--green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
               Transfer settles
             </h2>
             <p style={{ fontSize: 14, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>

@@ -68,7 +68,7 @@ function IdentityStrip() {
           opacity: balLoading ? 0.3 : 1, transition: "opacity var(--duration) var(--ease)",
         }}>
           {fmtBal}
-          <span style={{ fontSize: 15, color: "var(--text-3)", marginLeft: 8, letterSpacing: 0 }}>
+          <span style={{ fontSize: 16, color: "var(--text-3)", marginLeft: 8, letterSpacing: 0 }}>
             {(tokenSymbol as string) ?? "tTSLA"}
           </span>
         </div>
