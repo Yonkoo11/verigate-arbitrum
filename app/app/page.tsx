@@ -9,58 +9,95 @@ import { IssuerConsole } from "@/components/IssuerConsole";
 
 function GateHero() {
   const { connect, connectors } = useConnect();
+  const onConnect = () => connectors[0] && connect({ connector: connectors[0], chainId: robinhoodChain.id });
   return (
-    <div className="gate-hero">
-      {/* LEFT: Denied zone */}
-      <div className="gate-hero-denied">
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 28 }}>
-          Without verification
-        </span>
-        <div style={{ width: 44, height: 44, border: "1px solid var(--red-border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M6 6l8 8M14 6l-8 8" stroke="var(--red)" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </div>
-        <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
-          Transfer Denied
-        </h2>
-        <p style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
-          No valid attestation found. Compliance check failed at CountryRestriction module.
+    <div>
+      {/* INTRO — value proposition leads */}
+      <section className="hero-intro">
+        <div className="hero-eyebrow">Securities compliance · Robinhood Chain testnet</div>
+        <h1 className="hero-title">Compliance, enforced at the token.</h1>
+        <p className="hero-sub">
+          Verigate is the on-chain compliance layer for tokenized stocks. A tokenized share
+          rejects any transfer to an unverified, sanctioned, or non-accredited wallet, and
+          settles instantly for verified ones.
         </p>
-        <div style={{ marginTop: 36, padding: "14px 16px", background: "rgba(255,255,255,0.015)", border: "1px solid var(--border)" }}>
-          {[["Status", "REVERTED", true], ["Module", "CountryRestriction", false], ["Reason", "Recipient has no attestation", false]].map(([label, value, isRed], i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label as string}</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: isRed ? "var(--red)" : "var(--text-3)" }}>{value as string}</span>
+        <div className="hero-cta">
+          <button onClick={onConnect} className="btn btn-primary">Connect Wallet</button>
+          <a className="btn btn-ghost" href={`${CHAIN_EXPLORER}/address/${addresses.rwaToken}`} target="_blank" rel="noopener noreferrer">
+            View the live contract
+          </a>
+        </div>
+        <div className="hero-meta">
+          <span><strong style={{ color: "var(--text-2)", fontWeight: 500 }}>Tokenized TSLA</strong> live on-chain</span>
+          <span className="hero-dot" />
+          <span>4 verified contracts</span>
+          <span className="hero-dot" />
+          <span>ERC-3643-aligned</span>
+        </div>
+      </section>
+
+      {/* DEMONSTRATION — the signature gate, as live proof */}
+      <div className="gate-caption">The same transfer, two recipients</div>
+      <div className="gate-hero">
+        {/* LEFT: Denied zone */}
+        <div className="gate-hero-denied">
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 24 }}>
+            Without verification
+          </span>
+          <div style={{ width: 44, height: 44, border: "1px solid var(--red-border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M6 6l8 8M14 6l-8 8" stroke="var(--red)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
+            Transfer reverted
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
+            The recipient holds no KYC attestation, so the token refuses to move.
+          </p>
+          <div style={{ marginTop: 32, padding: "14px 16px", background: "rgba(255,255,255,0.015)", border: "1px solid var(--border)" }}>
+            {[["Status", "REVERTED", true], ["Module", "CountryRestriction", false], ["Reason", "Recipient has no attestation", false]].map(([label, value, isRed], i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 24, padding: "7px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label as string}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: isRed ? "var(--red)" : "var(--text-3)" }}>{value as string}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* GATE LINE */}
+        <div className="gate-line">
+          <div className="gate-line-bar" />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--amber)", boxShadow: "0 0 20px rgba(201,165,92,0.35)", zIndex: 1 }} />
+          <span className="gate-label">Verigate</span>
+        </div>
+
+        {/* RIGHT: Approved zone */}
+        <div className="gate-hero-approved">
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, var(--amber-glow), transparent)", pointerEvents: "none" }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.7, marginBottom: 24, display: "block" }}>
+              With verification
+            </span>
+            <div style={{ width: 44, height: 44, border: "1px solid var(--green-border)", background: "var(--green-dim)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 10l4 4 6-7" stroke="var(--green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-          ))}
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
+              Transfer settles
+            </h2>
+            <p style={{ fontSize: 14, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>
+              Every module passes: jurisdiction, accreditation, holder cap. The share moves on-chain.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* GATE LINE */}
-      <div className="gate-line">
-        <div className="gate-line-bar" />
-        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--amber)", boxShadow: "0 0 20px rgba(201,165,92,0.35)", zIndex: 1 }} />
-        <span className="gate-label">
-          Verigate
-        </span>
-      </div>
-
-      {/* Central tagline — the one thing a judge reads */}
-      <div style={{
-        position: "absolute", top: "var(--sp-8)", left: 0, right: 0, zIndex: 20,
-        textAlign: "center",
-      }}>
-        <span style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 500, color: "var(--text-2)", letterSpacing: "0.01em" }}>
-          Verigate — Compliance layer for tokenized stocks
-        </span>
-      </div>
-
-      {/* Hero footer — visible without wallet */}
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
-        display: "flex", justifyContent: "center", gap: "var(--sp-6)", padding: "var(--sp-4)",
-        borderTop: "1px solid var(--border)",
+      {/* Hero footer */}
+      <footer style={{
+        display: "flex", justifyContent: "center", gap: "var(--sp-6)", alignItems: "center",
+        padding: "var(--sp-6)", flexWrap: "wrap",
       }}>
         <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer"
           style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
@@ -73,35 +110,7 @@ function GateHero() {
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
           Built on Robinhood Chain
         </span>
-      </div>
-
-      {/* RIGHT: Approved zone */}
-      <div className="gate-hero-approved">
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, var(--amber-glow), transparent)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.7, marginBottom: 28, display: "block" }}>
-            With verification
-          </span>
-          <div style={{ width: 44, height: 44, border: "1px solid var(--green-border)", background: "var(--green-dim)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M5 10l4 4 6-7" stroke="var(--green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
-            Transfer Approved
-          </h2>
-          <p style={{ fontSize: 14, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>
-            All compliance modules passed. EAS attestation verified for both parties.
-          </p>
-          <button
-            onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: robinhoodChain.id })}
-            className="btn btn-primary"
-            style={{ marginTop: 40 }}
-          >
-            Connect Wallet
-          </button>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }
