@@ -1,25 +1,24 @@
-# Covenant — Voiceover Script
+# Covenant — Voiceover Script (v2, product walkthrough)
 
-Brian voice · ~140 wpm · max 15 words/sentence · PAS framework · target ~80s.
-Each clip maps to its captured frame.
+Brian voice · ~140 wpm · each clip maps to a DISTINCT recorded product page (motion, no repeats).
 
 ## 01-hook
-A tokenized Tesla share that can't reach the wrong hands.
+This is a tokenized Tesla share. It can't move to a wallet that isn't allowed to hold it.
 
 ## 02-problem
-Tokenized stocks are securities. By law, they can't move to an unverified wallet. Not to a sanctioned country. Not to a non-accredited investor. Robinhood Chain ships the assets. The compliance layer was missing.
+Tokenized stocks are securities. By law, they can't reach an unverified wallet, a sanctioned country, or a non-accredited investor.
 
-## 03-solution
-Covenant is that layer. It enforces the rules at the token. Every transfer checks an on-chain KYC attestation before it can settle.
+## 03-overview
+An issuer runs the whole thing from one console. Supply, holders against the regulatory cap, every compliance rule.
 
-## 04-blocked
-Here's an investor's wallet on Robinhood Chain. It carries a live KYC credential. Jurisdiction, accreditation, the issuer. All on-chain, all verifiable.
+## 04-registry
+Investors are verified on-chain. Each wallet earns a KYC credential — jurisdiction, accreditation — decoded straight from the chain.
 
-## 05-verify
-The issuer onboards investors right here. One attestation, linked to a wallet. Now that wallet can hold the security.
+## 05-activity
+And every compliance decision is a public record. Each settled transfer, each block, with its reason. Nothing off-chain.
 
-## 06-hardpart
-Send a tokenized share to an unverified wallet, and it reverts. Verify the investor, and the exact same transfer settles. Even valid KYC in a sanctioned country stays blocked.
+## 06-gate
+Send to an unverified wallet, and it reverts. Verify the investor, and the same transfer settles.
 
 ## 07-close
-It's live and source-verified on Robinhood Chain and Arbitrum. Ninety-seven tests. Security-audited. Covenant. Compliance, enforced at the token.
+Live and source-verified on Robinhood Chain and Arbitrum. Covenant. Compliance, enforced at the token.

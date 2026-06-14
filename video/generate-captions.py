@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
+# Transparent 1920x1080 caption overlays (verbatim to voiceover) for video compositing.
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 BASE = os.path.expanduser("~/Projects/verigate-arbitrum/video")
-FRAMES, OUT = f"{BASE}/frames", f"{BASE}/composites"
+OUT = f"{BASE}/captions"
 os.makedirs(OUT, exist_ok=True)
+W, H = 1920, 1080
 
 CAPTIONS = {
-    "01-hook": "A tokenized Tesla share that can't reach the wrong hands.",
-    "02-problem": "Tokenized stocks are securities. They can't move to an unverified, sanctioned, or non-accredited wallet.",
-    "03-solution": "Covenant enforces the rules at the token. Every transfer checks an on-chain KYC attestation before it settles.",
-    "04-blocked": "An investor's wallet carries a live on-chain KYC credential: jurisdiction, accreditation, the issuer.",
-    "05-verify": "The issuer onboards investors here. One attestation, linked to a wallet, lets it hold the security.",
-    "06-hardpart": "Unverified, or wrong jurisdiction? It reverts. Verified? The same transfer settles.",
+    "01-hook": "This is a tokenized Tesla share. It can't move to a wallet that isn't allowed to hold it.",
+    "02-problem": "Tokenized stocks are securities. By law, they can't reach an unverified wallet, a sanctioned country, or a non-accredited investor.",
+    "03-overview": "An issuer runs the whole thing from one console — supply, holders against the regulatory cap, every compliance rule.",
+    "04-registry": "Investors are verified on-chain. Each wallet earns a KYC credential — jurisdiction, accreditation — decoded straight from the chain.",
+    "05-activity": "Every compliance decision is a public record. Each settled transfer, each block, with its reason. Nothing off-chain.",
+    "06-gate": "Send to an unverified wallet, and it reverts. Verify the investor, and the same transfer settles.",
     "07-close": "Live and source-verified on Robinhood Chain and Arbitrum. Covenant — compliance, enforced at the token.",
 }
 
@@ -29,7 +31,7 @@ def load_font(size):
             except Exception: pass
     return ImageFont.load_default()
 
-FONT = load_font(46)
+FONT = load_font(44)
 
 def wrap(draw, text, font, max_w):
     words, lines, cur = text.split(), [], ""
@@ -41,28 +43,24 @@ def wrap(draw, text, font, max_w):
     return lines
 
 for name, text in CAPTIONS.items():
-    src = f"{FRAMES}/{name}.png"
-    if not os.path.exists(src):
-        print("missing frame", name); continue
-    img = Image.open(src).convert("RGBA")
-    W, H = img.size
-    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(overlay)
-    margin = 200
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    margin = 220
     lines = wrap(d, text, FONT, W - 2*margin)
-    lh = 60
-    box_h = lh*len(lines) + 48
-    box_y0 = H - box_h - 70
-    # centered pill
+    lh = 58
+    box_h = lh*len(lines) + 44
+    box_y0 = H - box_h - 84
     maxw = max(d.textlength(l, font=FONT) for l in lines)
-    bx0 = (W - maxw)//2 - 40
-    bx1 = (W + maxw)//2 + 40
-    d.rounded_rectangle([bx0, box_y0, bx1, box_y0+box_h], radius=14, fill=(20, 17, 14, 210))
-    y = box_y0 + 24
+    bx0 = (W - maxw)//2 - 44
+    bx1 = (W + maxw)//2 + 44
+    # subtle drop shadow then warm-dark pill
+    d.rounded_rectangle([bx0+3, box_y0+4, bx1+3, box_y0+box_h+4], radius=16, fill=(0, 0, 0, 70))
+    d.rounded_rectangle([bx0, box_y0, bx1, box_y0+box_h], radius=16, fill=(20, 17, 14, 224))
+    y = box_y0 + 22
     for l in lines:
         lw = d.textlength(l, font=FONT)
         d.text(((W-lw)//2, y), l, font=FONT, fill=(247, 243, 236, 255))
         y += lh
-    Image.alpha_composite(img, overlay).convert("RGB").save(f"{OUT}/{name}.png")
-    print("captioned", name)
+    img.save(f"{OUT}/{name}.png")
+    print("caption", name, f"({len(lines)} lines)")
 print("done")

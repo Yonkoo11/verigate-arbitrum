@@ -1,47 +1,37 @@
 #!/usr/bin/env zsh
-setopt +o nomatch
-D=~/Projects/verigate-arbitrum/video
-COMP=$D/composites; AUD=$D/audio; SEG=$D/segments
-mkdir -p $SEG; rm -f $SEG/*.mp4
-VFADE_IN=0.2; AUDIO_DELAY=0.5; BREATH=0.3; VFADE_OUT=0.2; GAP=0.3
-clips=(01-hook 02-problem 03-solution 04-blocked 05-verify 06-hardpart 07-close)
+# Composite per-page motion clips + caption overlays + delayed voiceover, then
+# concat, mix a music bed, and color-grade → covenant-demo.mp4
+set -e
+cd ~/Projects/verigate-arbitrum/video
+WORK=.work; rm -rf $WORK; mkdir -p $WORK
 
-# black gap segment
-ffmpeg -y -f lavfi -i color=c=0x0a0a0a:s=1920x1080:d=$GAP -f lavfi -i anullsrc=r=44100:cl=stereo \
-  -t $GAP -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 128k -r 30 $SEG/gap.mp4 2>/dev/null
+ORDER=(01-hook 02-problem 03-overview 04-registry 05-activity 06-gate 07-close)
+LEAD=0.5        # audio starts 0.5s into each segment
+TAIL=0.5        # breath after audio before cut
+FADE=0.2
 
-for c in $clips; do
-  adur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $AUD/$c.mp3)
-  TOTAL=$(python3 -c "print(round($AUDIO_DELAY+$adur+$BREATH,3))")
-  FO_START=$(python3 -c "print(round($TOTAL-$VFADE_OUT,3))")
-  AFO_START=$(python3 -c "print(round($AUDIO_DELAY+$adur-0.25,3))")
-  ffmpeg -y -loop 1 -i $COMP/$c.png -i $AUD/$c.mp3 -filter_complex "
-    anullsrc=r=44100:cl=stereo,atrim=0:${AUDIO_DELAY}[s];
-    [s][1:a]concat=n=2:v=0:a=1[j];
-    [j]afade=t=in:st=${AUDIO_DELAY}:d=0.15,afade=t=out:st=${AFO_START}:d=0.25,apad=whole_dur=${TOTAL}[a];
-    [0:v]scale=1920:1080,fade=t=in:st=0:d=${VFADE_IN},fade=t=out:st=${FO_START}:d=${VFADE_OUT}[v]
-  " -map "[v]" -map "[a]" -t $TOTAL -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 128k -r 30 $SEG/$c.mp4 2>/dev/null
-  echo "seg $c (${TOTAL}s)"
+for name in $ORDER; do
+  adur=$(python3 -c "import json;print(json.load(open('durations.json'))['$name'])")
+  seg=$(python3 -c "print(round($LEAD + $adur + $TAIL, 2))")
+  fout=$(python3 -c "print(round($seg - $FADE, 2))")
+  fg="[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,trim=0:$seg,setpts=PTS-STARTPTS,fps=30,fade=in:st=0:d=$FADE,fade=out:st=$fout:d=${FADE}[vb];[vb][1:v]overlay=0:0[v];anullsrc=r=44100:cl=stereo,atrim=0:${LEAD}[lead];[2:a]aresample=44100[av];[lead][av]concat=n=2:v=0:a=1,apad,atrim=0:${seg}[a]"
+  ffmpeg -y -loglevel error -i clips/$name.webm -i captions/$name.png -i audio/$name.mp3 \
+    -filter_complex "$fg" -map "[v]" -map "[a]" -t $seg -r 30 \
+    -c:v libx264 -preset medium -pix_fmt yuv420p -c:a aac -ar 44100 $WORK/seg-$name.mp4
+  echo "seg $name (${seg}s)"
 done
 
-# concat with gaps between
-list=$D/concat.txt; : > $list
-first=1
-for c in $clips; do
-  [ $first -eq 0 ] && echo "file '$SEG/gap.mp4'" >> $list
-  echo "file '$SEG/$c.mp4'" >> $list
-  first=0
-done
-ffmpeg -y -f concat -safe 0 -i $list -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 128k $D/_novo.mp4 2>/dev/null
-echo "concatenated"
+: > $WORK/list.txt
+for name in $ORDER; do echo "file 'seg-$name.mp4'" >> $WORK/list.txt; done
+ffmpeg -y -loglevel error -f concat -safe 0 -i $WORK/list.txt \
+  -c:v libx264 -preset medium -pix_fmt yuv420p -c:a aac -ar 44100 $WORK/joined.mp4
 
-# mix background music (low) + color grade -> final
-vdur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $D/_novo.mp4)
-mfo=$(python3 -c "print(round($vdur-3,3))")
-ffmpeg -y -i $D/_novo.mp4 -i $D/music/bg.mp3 -filter_complex "
-  [0:v]eq=contrast=1.05:saturation=1.06:brightness=0.01[v];
-  [1:a]volume=0.11,afade=t=out:st=${mfo}:d=3[bg];
-  [0:a][bg]amix=inputs=2:duration=first:dropout_transition=0[a]
-" -map "[v]" -map "[a]" -c:v libx264 -preset fast -crf 21 -pix_fmt yuv420p -c:a aac -b:a 160k $D/covenant-demo.mp4 2>/dev/null
-rm -f $D/_novo.mp4
-echo "FINAL: $D/covenant-demo.mp4 (${vdur}s)"
+total=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $WORK/joined.mp4)
+mout=$(python3 -c "print(round($total - 2, 2))")
+mfg="[1:a]volume=0.10,afade=in:st=0:d=1.5,afade=out:st=$mout:d=2[m];[0:a][m]amix=inputs=2:duration=first:dropout_transition=3[mx];[mx]loudnorm=I=-16:TP=-1.5:LRA=11[a];[0:v]eq=contrast=1.05:saturation=1.06:brightness=0.01[v]"
+# (the [m]/[a]/[v] labels follow literals here, not bare $vars, so no brace needed)
+ffmpeg -y -loglevel error -i $WORK/joined.mp4 -i music/bg.mp3 \
+  -filter_complex "$mfg" -map "[v]" -map "[a]" -shortest -movflags +faststart covenant-demo.mp4
+
+rm -rf $WORK
+echo "=== done: covenant-demo.mp4 ($(ffprobe -v error -show_entries format=duration -of csv=p=0 covenant-demo.mp4)s) ==="
