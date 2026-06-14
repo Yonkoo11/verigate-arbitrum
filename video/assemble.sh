@@ -32,7 +32,7 @@ mout=$(python3 -c "print(round($total - 2, 2))")
 mfg="[1:a]volume=0.10,afade=in:st=0:d=1.5,afade=out:st=$mout:d=2[m];[0:a][m]amix=inputs=2:duration=first:dropout_transition=3[mx];[mx]loudnorm=I=-16:TP=-1.5:LRA=11[a];[0:v]eq=contrast=1.05:saturation=1.06:brightness=0.01[v]"
 # (the [m]/[a]/[v] labels follow literals here, not bare $vars, so no brace needed)
 ffmpeg -y -loglevel error -i $WORK/joined.mp4 -i music/bg.mp3 \
-  -filter_complex "$mfg" -map "[v]" -map "[a]" -shortest -movflags +faststart covenant-demo.mp4
+  -filter_complex "$mfg" -map "[v]" -map "[a]" -shortest -c:a aac -ar 48000 -b:a 192k -movflags +faststart covenant-demo.mp4
 
 rm -rf $WORK
 echo "=== done: covenant-demo.mp4 ($(ffprobe -v error -show_entries format=duration -of csv=p=0 covenant-demo.mp4)s) ==="
