@@ -50,3 +50,5 @@ venv/
 .vscode/
 *.swp
 deployments/local-*.json
+/video/
+/proposals/
