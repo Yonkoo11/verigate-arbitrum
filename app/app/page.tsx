@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useConnect, useChainId, useSwitchChain } from "wagmi";
+import { useAccount, useConnect, useChainId, useSwitchChain, useReadContract } from "wagmi";
 import { robinhoodChain } from "@/app/providers";
-import { CHAIN_EXPLORER } from "@/lib/contracts";
-import { TokenDashboard } from "@/components/TokenDashboard";
-import { ComplianceStatus } from "@/components/ComplianceStatus";
-import { TransferForm } from "@/components/TransferForm";
-import { IssuerPanel } from "@/components/IssuerPanel";
+import { CHAIN_EXPLORER, addresses, rwaTokenAbi } from "@/lib/contracts";
+import { InvestorView } from "@/components/InvestorView";
+import { IssuerConsole } from "@/components/IssuerConsole";
 
 function GateHero() {
   const { connect, connectors } = useConnect();
@@ -23,10 +21,10 @@ function GateHero() {
             <path d="M6 6l8 8M14 6l-8 8" stroke="var(--red)" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
-        <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 30, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
+        <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-3)", lineHeight: 1.2, marginBottom: 14 }}>
           Transfer Denied
         </h2>
-        <p style={{ fontSize: 15, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
           No valid attestation found. Compliance check failed at CountryRestriction module.
         </p>
         <div style={{ marginTop: 36, padding: "14px 16px", background: "rgba(255,255,255,0.015)", border: "1px solid var(--border)" }}>
@@ -53,7 +51,7 @@ function GateHero() {
         position: "absolute", top: "var(--sp-8)", left: 0, right: 0, zIndex: 20,
         textAlign: "center",
       }}>
-        <span style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 500, color: "var(--text-2)", letterSpacing: "0.01em" }}>
+        <span style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 500, color: "var(--text-2)", letterSpacing: "0.01em" }}>
           Verigate — Compliance layer for tokenized stocks
         </span>
       </div>
@@ -89,17 +87,16 @@ function GateHero() {
               <path d="M5 10l4 4 6-7" stroke="var(--green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 30, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-1)", lineHeight: 1.2, marginBottom: 14 }}>
             Transfer Approved
           </h2>
-          <p style={{ fontSize: 15, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14, color: "var(--text-2)", maxWidth: 340, lineHeight: 1.6 }}>
             All compliance modules passed. EAS attestation verified for both parties.
           </p>
           <button
             onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: robinhoodChain.id })}
-            style={{ marginTop: 40, fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 500, color: "var(--black)", background: "var(--amber)", border: "none", padding: "14px 32px", cursor: "pointer", minHeight: 48, transition: "opacity var(--duration) var(--ease)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+            className="btn btn-primary"
+            style={{ marginTop: 40 }}
           >
             Connect Wallet
           </button>
@@ -124,11 +121,8 @@ function WrongChainBanner() {
       </span>
       <button
         onClick={() => switchChain({ chainId: robinhoodChain.id })}
-        style={{
-          fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
-          color: "var(--black)", background: "#f59e0b", border: "none",
-          padding: "8px 16px", cursor: "pointer", minHeight: 36, flexShrink: 0,
-        }}
+        className="btn btn-primary btn-sm"
+        style={{ color: "var(--black)", background: "#f59e0b", flexShrink: 0 }}
       >
         Switch Network
       </button>
@@ -136,26 +130,80 @@ function WrongChainBanner() {
   );
 }
 
-function Dashboard() {
+type Role = "investor" | "issuer";
+
+function RoleControl({ role, setRole, isOwner }: { role: Role; setRole: (r: Role) => void; isOwner: boolean }) {
+  const tab = (value: Role, label: string, enabled: boolean): React.ReactNode => {
+    const active = role === value;
+    return (
+      <button
+        role="tab"
+        aria-selected={active}
+        aria-disabled={!enabled}
+        tabIndex={enabled ? 0 : -1}
+        onClick={() => enabled && setRole(value)}
+        className={active ? "btn btn-primary" : "btn btn-ghost"}
+        style={{
+          flex: 1,
+          border: "none",
+          borderBottom: active ? "1px solid var(--amber)" : "1px solid transparent",
+          cursor: enabled ? "pointer" : "not-allowed",
+          opacity: enabled ? 1 : 0.5,
+        }}
+      >
+        {label}
+      </button>
+    );
+  };
   return (
-    <div style={{ maxWidth: 1120, margin: "0 auto", padding: "var(--sp-8) var(--sp-6) var(--sp-16)" }}>
+    <div role="tablist" aria-label="View role" style={{
+      display: "flex", border: "1px solid var(--border)", background: "var(--surface-1)", marginBottom: "var(--sp-4)",
+    }}>
+      {tab("investor", "Investor", true)}
+      {tab("issuer", "Issuer Console", isOwner)}
+    </div>
+  );
+}
+
+function Dashboard() {
+  const { address } = useAccount();
+  const [role, setRole] = useState<Role>("investor");
+
+  const { data: owner } = useReadContract({
+    address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "owner",
+    query: { enabled: !!addresses.rwaToken },
+  });
+  const isOwner = !!address && !!owner && (address as string).toLowerCase() === (owner as string).toLowerCase();
+
+  // If a non-owner is somehow on the issuer tab (e.g. wallet switch), fall back.
+  useEffect(() => {
+    if (role === "issuer" && !isOwner) setRole("investor");
+  }, [role, isOwner]);
+
+  return (
+    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "var(--sp-10) var(--sp-6) var(--sp-16)" }}>
       <WrongChainBanner />
-      <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 500, color: "var(--text-1)", marginBottom: "var(--sp-8)", letterSpacing: "-0.01em" }}>
-        Compliance Dashboard
+      <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-1)", marginBottom: "var(--sp-2)", letterSpacing: "-0.01em" }}>
+        Compliance dashboard
       </h1>
-      <div className="dash-grid">
-        <TokenDashboard />
-        <ComplianceStatus />
-      </div>
-      <div style={{ marginTop: "var(--sp-6)" }}>
-        <TransferForm />
-      </div>
-      <div style={{ margin: "var(--sp-12) 0", height: 1, background: "var(--amber-border)", position: "relative" }}>
-        <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", background: "var(--black)", padding: "0 12px", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.5 }}>
-          Issuer Controls
-        </div>
-      </div>
-      <IssuerPanel />
+      <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", marginBottom: "var(--sp-8)" }}>
+        Verify before you transfer — the compliance layer for tokenized equity.
+      </p>
+
+      <RoleControl role={role} setRole={setRole} isOwner={isOwner} />
+
+      {role === "issuer" && isOwner ? (
+        <IssuerConsole />
+      ) : (
+        <>
+          <InvestorView />
+          {!isOwner && (
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-3)", marginTop: "var(--sp-6)", textAlign: "center" }}>
+              Connect the issuer wallet to manage compliance.
+            </p>
+          )}
+        </>
+      )}
 
       {/* Footer */}
       <footer style={{ marginTop: "var(--sp-16)", paddingTop: "var(--sp-6)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--sp-4)" }}>

@@ -29,14 +29,7 @@ export function WalletConnect() {
   // Stable placeholder for SSR + first client render (matches server output).
   if (!mounted) {
     return (
-      <button
-        disabled
-        style={{
-          fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500,
-          color: "var(--black)", background: "var(--amber)", border: "none",
-          padding: "10px 20px", opacity: 0.5, minHeight: 44, cursor: "not-allowed",
-        }}
-      >
+      <button disabled className="btn btn-primary">
         Connect Wallet
       </button>
     );
@@ -48,11 +41,8 @@ export function WalletConnect() {
         {wrongChain && (
           <button
             onClick={() => switchChain({ chainId: robinhoodChain.id })}
-            style={{
-              fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
-              color: "var(--black)", background: "#f59e0b", border: "none",
-              padding: "8px 14px", cursor: "pointer", minHeight: 40,
-            }}
+            className="btn btn-primary btn-sm"
+            style={{ color: "var(--black)", background: "#f59e0b" }}
           >
             Switch to Robinhood Chain
           </button>
@@ -71,15 +61,7 @@ export function WalletConnect() {
         </div>
         <button
           onClick={() => disconnect()}
-          style={{
-            fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
-            color: "var(--text-3)", background: "transparent",
-            border: "1px solid var(--border)", padding: "8px 14px",
-            cursor: "pointer", minHeight: 40,
-            transition: "color var(--duration) var(--ease), border-color var(--duration) var(--ease)",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--red)"; e.currentTarget.style.borderColor = "var(--red-border)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-3)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+          className="btn btn-ghost btn-sm"
         >
           Disconnect
         </button>
@@ -99,13 +81,7 @@ export function WalletConnect() {
     <button
       onClick={() => connect({ connector: connectors[0], chainId: robinhoodChain.id })}
       disabled={isPending}
-      style={{
-        fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500,
-        color: "var(--black)", background: "var(--amber)", border: "none",
-        padding: "10px 20px", cursor: isPending ? "not-allowed" : "pointer",
-        opacity: isPending ? 0.5 : 1, minHeight: 44,
-        transition: "opacity var(--duration) var(--ease)",
-      }}
+      className="btn btn-primary"
     >
       {isPending ? "Connecting..." : "Connect Wallet"}
     </button>

@@ -7,11 +7,59 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Hover states for links */
-a:hover { opacity: 0.8; }
+/* Hover states for links — only on hover-capable devices (Rule 23) */
+@media (hover: hover) {
+  a:hover { opacity: 0.8; }
+}
 
-/* Sharp inputs globally */
-input { border-radius: 0 !important; }
+/* Sharp edges everywhere — institutional "ledger" language. One radius value: 0,
+   except status dots (50%). */
+input, button, select, textarea { border-radius: 0 !important; }
+
+/* ============================================================
+   BUTTON SYSTEM — hierarchy + press feedback (single source of truth)
+   ============================================================ */
+.btn {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  transition: background var(--duration) var(--ease), border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease), opacity var(--duration) var(--ease), transform 90ms var(--ease);
+  user-select: none;
+}
+.btn:disabled { cursor: not-allowed; }
+/* Clean, calm disabled state — not a muddy dimmed amber */
+.btn-primary:disabled { background: var(--surface-3); color: var(--text-4); }
+.btn-ghost:disabled, .btn-danger:disabled { opacity: 0.45; }
+/* Press feedback — every button, the #1 "feels real" detail */
+.btn:not(:disabled):active { transform: translateY(1px); }
+
+.btn-primary { background: var(--amber); color: var(--black); }
+@media (hover: hover) { .btn-primary:not(:disabled):hover { background: var(--amber-hover); } }
+
+.btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-strong); }
+@media (hover: hover) { .btn-ghost:not(:disabled):hover { color: var(--text-1); border-color: var(--text-3); } }
+
+.btn-danger { background: transparent; color: var(--text-3); border-color: var(--border); }
+@media (hover: hover) { .btn-danger:not(:disabled):hover { color: var(--red); border-color: var(--red-border); } }
+
+.btn-sm { min-height: 38px; padding: 0 14px; font-size: 13px; }
+
+/* ============================================================
+   CARD HIERARCHY — one primary surface per view leads the eye
+   ============================================================ */
+.card-primary {
+  border-color: var(--amber-border) !important;
+  box-shadow: 0 0 0 1px var(--amber-border), 0 24px 60px -24px var(--amber-glow);
+}
 
 
 :root {
@@ -234,6 +282,12 @@ input::placeholder {
   .admin-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* Connected-view grids collapse to a single column on mobile */
+  .gate-inputs,
+  .issuer-row {
+    grid-template-columns: 1fr !important;
   }
 }
 
