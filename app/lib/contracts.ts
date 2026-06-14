@@ -15,15 +15,20 @@ export const maxHoldersAbi = MaxHoldersABI.abi;
 export const rwaTokenFactoryAbi = RWATokenFactoryABI.abi;
 export const covenantAttesterAbi = CovenantAttesterABI.abi;
 
-// Contract addresses from environment
+// Contract addresses. Defaults are the LIVE Robinhood Chain (46630) Covenant deployment,
+// so the hosted demo works even when build-time env vars are unset/empty (|| falls back on
+// empty string too). These are public addresses — no secrets.
 export const addresses = {
-  rwaToken: (process.env.NEXT_PUBLIC_RWA_TOKEN_ADDRESS ?? "") as Address,
-  complianceEngine: (process.env.NEXT_PUBLIC_COMPLIANCE_ENGINE_ADDRESS ??
-    "") as Address,
-  countryRestriction: (process.env.NEXT_PUBLIC_COUNTRY_RESTRICTION_ADDRESS ??
-    "") as Address,
-  factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ?? "") as Address,
-  registry: (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? "") as Address,
+  rwaToken: (process.env.NEXT_PUBLIC_RWA_TOKEN_ADDRESS ||
+    "0x477f2a84503d6b8eefae021a5d94d0a8cdb9c74a") as Address,
+  complianceEngine: (process.env.NEXT_PUBLIC_COMPLIANCE_ENGINE_ADDRESS ||
+    "0x52e21af43035ce398dddd1aa6e75cea3a1f0c776") as Address,
+  countryRestriction: (process.env.NEXT_PUBLIC_COUNTRY_RESTRICTION_ADDRESS ||
+    "0xfD17A992a812c308AaAE97e5C506541AC82e21eb") as Address,
+  factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ||
+    "0x41404B1e68614698af7837b82264A46BAf470923") as Address,
+  registry: (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
+    "0x70E72995Eabaf8b920063C8257690084A2387405") as Address,
 };
 
 // Covenant KYC schema id = keccak256("covenant.kyc.v1")
