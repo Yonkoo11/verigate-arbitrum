@@ -104,12 +104,13 @@ contract CovenantAttester is IAttestationRegistry, Ownable {
         emit Attested(uid, recipient, msg.sender, schema);
     }
 
-    /// @notice Revoke an attestation. Only the original attester may revoke, and only if
-    ///         the attestation was issued as revocable.
+    /// @notice Revoke an attestation. The original attester OR the registry owner may revoke
+    ///         (the owner backstop lets a compromised/rogue attester's attestations be
+    ///         invalidated), provided the attestation was issued as revocable.
     function revoke(bytes32 uid) external {
         Attestation storage att = _attestations[uid];
         if (att.uid == bytes32(0)) revert AttestationNotFound(uid);
-        if (att.attester != msg.sender) revert NotOriginalAttester(uid);
+        if (att.attester != msg.sender && msg.sender != owner()) revert NotOriginalAttester(uid);
         if (!att.revocable) revert NotRevocable(uid);
         if (att.revocationTime != 0) revert AlreadyRevoked(uid);
 

@@ -91,7 +91,10 @@ contract RWAToken is ERC20, Ownable, Pausable {
     }
 
     /// @notice Set the MaxHolders module for holder tracking callbacks
+    /// @dev Single-set: wiring a fresh module after holders already exist would desync
+    ///      the holder count. The factory sets this once before any mint.
     function setMaxHoldersModule(address _module) external onlyOwner {
+        require(address(maxHoldersModule) == address(0), "MaxHolders module already set");
         maxHoldersModule = MaxHolders(_module);
     }
 
@@ -104,7 +107,7 @@ contract RWAToken is ERC20, Ownable, Pausable {
         if (_forcedTransfer) {
             uint256 toBalBefore = (to != address(0)) ? balanceOf(to) : 0;
             super._update(from, to, amount);
-            if (address(maxHoldersModule) != address(0)) {
+            if (address(maxHoldersModule) != address(0) && amount > 0) {
                 uint256 fromBal = (from != address(0)) ? balanceOf(from) : 0;
                 maxHoldersModule.onTransfer(from, to, fromBal, toBalBefore);
             }
@@ -133,7 +136,9 @@ contract RWAToken is ERC20, Ownable, Pausable {
         super._update(from, to, amount);
 
         // Notify MaxHolders module for holder count tracking
-        if (address(maxHoldersModule) != address(0)) {
+        // Skip the holder callback on zero-amount transfers — they don't change holdings
+        // and would otherwise let anyone register phantom (zero-balance) holders.
+        if (address(maxHoldersModule) != address(0) && amount > 0) {
             uint256 fromBalance = (from != address(0)) ? balanceOf(from) : 0;
             maxHoldersModule.onTransfer(from, to, fromBalance, toBalanceBefore);
         }

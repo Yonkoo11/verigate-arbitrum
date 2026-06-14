@@ -20,27 +20,27 @@ contract AccreditedInvestor is IComplianceModule {
     }
 
     function checkCompliance(
-        address, /* from */
-        address, /* to */
+        address from,
+        address to,
         uint256, /* amount */
         IAttestationRegistry registry,
         bytes32 fromAttestationUID,
         bytes32 toAttestationUID
     ) external view override returns (bool compliant, string memory reason) {
         if (checkSender) {
-            (bool ok, string memory err) = _checkAccredited(registry, fromAttestationUID, "sender");
+            (bool ok, string memory err) = _checkAccredited(registry, fromAttestationUID, from, "sender");
             if (!ok) return (false, err);
         }
 
         if (checkRecipient) {
-            (bool ok, string memory err) = _checkAccredited(registry, toAttestationUID, "recipient");
+            (bool ok, string memory err) = _checkAccredited(registry, toAttestationUID, to, "recipient");
             if (!ok) return (false, err);
         }
 
         return (true, "");
     }
 
-    function _checkAccredited(IAttestationRegistry registry, bytes32 uid, string memory party)
+    function _checkAccredited(IAttestationRegistry registry, bytes32 uid, address wallet, string memory party)
         internal
         view
         returns (bool, string memory)
@@ -55,12 +55,27 @@ contract AccreditedInvestor is IComplianceModule {
 
         Attestation memory att = registry.getAttestation(uid);
 
+        // Bind the attestation to the wallet it gates.
+        if (att.recipient != wallet) {
+            return (false, string.concat("AccreditedInvestor: ", party, " attestation recipient mismatch"));
+        }
+
+        // Guard the decode so malformed/foreign-schema data can't revert (freeze) the transfer.
+        if (att.data.length < 160) {
+            return (false, string.concat("AccreditedInvestor: ", party, " attestation data malformed"));
+        }
+
         if (att.expirationTime != 0 && att.expirationTime < block.timestamp) {
             return (false, string.concat("AccreditedInvestor: ", party, " attestation expired"));
         }
 
         // Schema: (uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry)
-        (,, bool accredited,,) = abi.decode(att.data, (uint8, bytes2, bool, uint8, uint64));
+        (,, bool accredited,, uint64 kycExpiry) = abi.decode(att.data, (uint8, bytes2, bool, uint8, uint64));
+
+        // Enforce the schema-embedded KYC expiry.
+        if (kycExpiry != 0 && kycExpiry < block.timestamp) {
+            return (false, string.concat("AccreditedInvestor: ", party, " KYC expired"));
+        }
 
         if (!accredited) {
             return (false, string.concat("AccreditedInvestor: ", party, " is not accredited"));

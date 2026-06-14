@@ -82,14 +82,17 @@ contract MaxHolders is IComplianceModule {
     function onTransfer(address from, address to, uint256 fromBalance, uint256 toBalanceBefore) external {
         if (msg.sender != token) revert OnlyToken();
 
-        // New holder (recipient had zero balance before)
-        if (to != address(0) && toBalanceBefore == 0) {
+        // New holder: recipient had zero balance AND is not already counted.
+        // The `!isHolder[to]` guard prevents double-counting if balance/flag ever desync.
+        if (to != address(0) && toBalanceBefore == 0 && !isHolder[to]) {
             isHolder[to] = true;
             holderCount++;
         }
 
-        // Removed holder (sender now has zero balance)
-        if (from != address(0) && fromBalance == 0) {
+        // Removed holder: sender now has zero balance AND was actually counted.
+        // The `isHolder[from]` guard prevents underflow when decrementing an uncounted
+        // sender (e.g. a holder whose balance predates this module being wired).
+        if (from != address(0) && fromBalance == 0 && isHolder[from]) {
             isHolder[from] = false;
             holderCount--;
         }

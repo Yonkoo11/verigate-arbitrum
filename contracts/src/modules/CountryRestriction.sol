@@ -71,8 +71,8 @@ contract CountryRestriction is IComplianceModule, Ownable {
     // --- IComplianceModule ---
 
     function checkCompliance(
-        address, /* from */
-        address, /* to */
+        address from,
+        address to,
         uint256, /* amount */
         IAttestationRegistry registry,
         bytes32 fromAttestationUID,
@@ -85,15 +85,15 @@ contract CountryRestriction is IComplianceModule, Ownable {
 
         // Check sender if configured
         if (checkSenderCountry) {
-            (bool ok, string memory err) = _checkCountry(registry, fromAttestationUID, "sender");
+            (bool ok, string memory err) = _checkCountry(registry, fromAttestationUID, from, "sender");
             if (!ok) return (false, err);
         }
 
         // Always check recipient
-        return _checkCountry(registry, toAttestationUID, "recipient");
+        return _checkCountry(registry, toAttestationUID, to, "recipient");
     }
 
-    function _checkCountry(IAttestationRegistry registry, bytes32 uid, string memory party)
+    function _checkCountry(IAttestationRegistry registry, bytes32 uid, address wallet, string memory party)
         internal
         view
         returns (bool, string memory)
@@ -108,12 +108,29 @@ contract CountryRestriction is IComplianceModule, Ownable {
 
         Attestation memory att = registry.getAttestation(uid);
 
+        // Bind the attestation to the wallet it gates: an attestation issued about a
+        // different address must not satisfy compliance for this one.
+        if (att.recipient != wallet) {
+            return (false, string.concat("CountryRestriction: ", party, " attestation recipient mismatch"));
+        }
+
+        // Guard the decode — malformed/foreign-schema data would otherwise revert the whole
+        // transfer (freezing the wallet). The Covenant KYC payload is 5 abi-encoded words.
+        if (att.data.length < 160) {
+            return (false, string.concat("CountryRestriction: ", party, " attestation data malformed"));
+        }
+
         if (att.expirationTime != 0 && att.expirationTime < block.timestamp) {
             return (false, string.concat("CountryRestriction: ", party, " attestation expired"));
         }
 
         // Schema: (uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry)
-        (, bytes2 country,,,) = abi.decode(att.data, (uint8, bytes2, bool, uint8, uint64));
+        (, bytes2 country,,, uint64 kycExpiry) = abi.decode(att.data, (uint8, bytes2, bool, uint8, uint64));
+
+        // Enforce the schema-embedded KYC expiry, not only the registry-level expirationTime.
+        if (kycExpiry != 0 && kycExpiry < block.timestamp) {
+            return (false, string.concat("CountryRestriction: ", party, " KYC expired"));
+        }
 
         if (blockedCountries[country]) {
             return (false, string.concat("CountryRestriction: ", party, " country is restricted"));
