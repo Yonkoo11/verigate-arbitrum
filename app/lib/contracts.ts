@@ -39,6 +39,9 @@ export const KYC_SCHEMA =
 export const ROBINHOOD_CHAIN_ID = 46630;
 export const ROBINHOOD_RPC = "https://rpc.testnet.chain.robinhood.com";
 export const ROBINHOOD_EXPLORER = "https://explorer.testnet.chain.robinhood.com";
+// Block just before the live Covenant deployment on Robinhood Chain — the activity/
+// registry event scans start here so they cover the full on-chain history.
+export const COVENANT_DEPLOY_BLOCK = 75680000n;
 
 // Default chain (the demo points at Robinhood Chain)
 export const CHAIN_ID = ROBINHOOD_CHAIN_ID;

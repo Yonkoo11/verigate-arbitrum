@@ -8,8 +8,8 @@ import { ZERO_BYTES32 } from "@/lib/credential";
 import { useToast } from "./Toast";
 
 // Default-allowed jurisdictions plus a few that the module blocks (for demo).
-const COUNTRY_OPTIONS = ["US", "GB", "DE", "SG", "KP", "IR", "SY"];
-const COUNTRY_LABELS: Record<string, string> = {
+export const COUNTRY_OPTIONS = ["US", "GB", "DE", "SG", "KP", "IR", "SY"];
+export const COUNTRY_LABELS: Record<string, string> = {
   US: "United States", GB: "United Kingdom", DE: "Germany", SG: "Singapore",
   KP: "North Korea (blocked)", IR: "Iran (blocked)", SY: "Syria (blocked)",
 };
@@ -109,7 +109,7 @@ function Heading({ title, blurb }: { title: string; blurb?: string }) {
   );
 }
 
-function decodeCountry(hex: string): string {
+export function decodeCountry(hex: string): string {
   try {
     const b = hex.startsWith("0x") ? hex.slice(2) : hex;
     return String.fromCharCode(parseInt(b.slice(0, 2), 16)) + String.fromCharCode(parseInt(b.slice(2, 4), 16));
@@ -119,7 +119,7 @@ function decodeCountry(hex: string): string {
 /* ---------------------------------------------------------------- *
  *  Verify Investor — primary surface (attest → event → setUID)
  * ---------------------------------------------------------------- */
-function VerifyInvestor() {
+export function VerifyInvestor() {
   const { toast } = useToast();
   const [vWallet, setVWallet] = useState("");
   const [vCountry, setVCountry] = useState("US");
@@ -259,7 +259,7 @@ function VerifyInvestor() {
 /* ---------------------------------------------------------------- *
  *  Supply & controls — secondary
  * ---------------------------------------------------------------- */
-function SupplyControls() {
+export function SupplyControls() {
   const { toast } = useToast();
   const { data: decimals } = useReadContract({ address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "decimals" });
   const { data: paused } = useReadContract({ address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "paused" });
@@ -348,7 +348,7 @@ function SupplyControls() {
 /* ---------------------------------------------------------------- *
  *  Jurisdiction policy — secondary
  * ---------------------------------------------------------------- */
-function JurisdictionPolicy() {
+export function JurisdictionPolicy() {
   const { toast } = useToast();
   const { data: blocked } = useReadContract({ address: addresses.countryRestriction, abi: countryRestrictionAbi, functionName: "getBlockedCountries", query: { enabled: !!addresses.countryRestriction } });
   const { writeContract: wBlock, data: blockHash, isPending: blockP } = useWriteContract();

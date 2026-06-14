@@ -1,42 +1,19 @@
-"use client";
+import Link from "next/link";
+import { CHAIN_EXPLORER, addresses } from "@/lib/contracts";
 
-import { useState, useEffect } from "react";
-import { useAccount, useConnect, useChainId, useSwitchChain, useReadContract } from "wagmi";
-import { robinhoodChain } from "@/app/providers";
-import { CHAIN_EXPLORER, addresses, rwaTokenAbi } from "@/lib/contracts";
-import { InvestorView } from "@/components/InvestorView";
-import { IssuerConsole } from "@/components/IssuerConsole";
-
-function GateHero() {
-  const { connect, connectors } = useConnect();
-  const onConnect = () => connectors[0] && connect({ connector: connectors[0], chainId: robinhoodChain.id });
+/* CV Covenant wordmark */
+function Wordmark() {
   return (
-    <div>
-      {/* INTRO — value proposition leads */}
-      <section className="hero-intro">
-        <div className="hero-eyebrow">Securities compliance · Robinhood Chain testnet</div>
-        <h1 className="hero-title">Compliance, enforced at the token.</h1>
-        <p className="hero-sub">
-          Covenant is the on-chain compliance layer for tokenized stocks. A tokenized share
-          rejects any transfer to an unverified, sanctioned, or non-accredited wallet, and
-          settles instantly for verified ones.
-        </p>
-        <div className="hero-cta">
-          <button onClick={onConnect} className="btn btn-primary">Connect Wallet</button>
-          <a className="btn btn-ghost" href={`${CHAIN_EXPLORER}/address/${addresses.rwaToken}`} target="_blank" rel="noopener noreferrer">
-            View the live contract
-          </a>
-        </div>
-        <div className="hero-meta">
-          <span><strong style={{ color: "var(--text-2)", fontWeight: 500 }}>Tokenized TSLA</strong> live on-chain</span>
-          <span className="hero-dot" />
-          <span>4 verified contracts</span>
-          <span className="hero-dot" />
-          <span>ERC-3643-aligned</span>
-        </div>
-      </section>
+    <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <span className="cv-mark">CV</span>
+      <span className="cv-name">Covenant</span>
+    </span>
+  );
+}
 
-      {/* DEMONSTRATION — the signature gate, as live proof */}
+function GateSection() {
+  return (
+    <>
       <div className="gate-caption">The same transfer, two recipients</div>
       <div className="gate-hero">
         {/* LEFT: Denied zone */}
@@ -93,151 +70,141 @@ function GateHero() {
           </div>
         </div>
       </div>
-
-      {/* Hero footer */}
-      <footer style={{
-        display: "flex", justifyContent: "center", gap: "var(--sp-6)", alignItems: "center",
-        padding: "var(--sp-6)", flexWrap: "wrap",
-      }}>
-        <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer"
-          style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-          GitHub
-        </a>
-        <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer"
-          style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-          Explorer
-        </a>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
-          Built on Robinhood Chain
-        </span>
-      </footer>
-    </div>
+    </>
   );
 }
 
-function WrongChainBanner() {
-  const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
-  if (chainId === robinhoodChain.id) return null;
+const PROOF = [
+  { label: "RWA token (tTSLA)", addr: addresses.rwaToken },
+  { label: "Compliance engine", addr: addresses.complianceEngine },
+  { label: "Country restriction", addr: addresses.countryRestriction },
+  { label: "Attestation registry", addr: addresses.registry },
+];
+
+export default function Landing() {
   return (
-    <div style={{
-      background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.25)",
-      padding: "var(--sp-4)", marginBottom: "var(--sp-6)", display: "flex",
-      alignItems: "center", justifyContent: "space-between",
-    }}>
-      <span style={{ fontSize: 14, color: "#f59e0b" }}>
-        You are connected to the wrong network. Switch to Robinhood Chain to use Covenant.
-      </span>
-      <button
-        onClick={() => switchChain({ chainId: robinhoodChain.id })}
-        className="btn btn-primary btn-sm"
-        style={{ color: "#FFFFFF", background: "#f59e0b", flexShrink: 0 }}
-      >
-        Switch Network
-      </button>
-    </div>
-  );
-}
+    <div>
+      {/* NAV */}
+      <nav className="lp-nav">
+        <Wordmark />
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+          <Link href="/docs" className="btn btn-ghost btn-sm">Docs</Link>
+          <Link href="/dashboard" className="btn btn-primary btn-sm">Launch app</Link>
+        </div>
+      </nav>
 
-type Role = "investor" | "issuer";
+      {/* HERO */}
+      <section className="hero-intro">
+        <div className="hero-eyebrow">Securities compliance · Robinhood Chain testnet</div>
+        <h1 className="hero-title">Compliance, enforced at the token.</h1>
+        <p className="hero-sub">
+          Covenant is the on-chain compliance layer for tokenized stocks. A tokenized share
+          rejects any transfer to an unverified, sanctioned, or non-accredited wallet, and
+          settles instantly for verified ones.
+        </p>
+        <div className="hero-cta">
+          <Link href="/dashboard" className="btn btn-primary">Launch app</Link>
+          <a className="btn btn-ghost" href={`${CHAIN_EXPLORER}/address/${addresses.rwaToken}`} target="_blank" rel="noopener noreferrer">
+            View the live contract
+          </a>
+        </div>
+        <div className="hero-meta">
+          <span><strong style={{ color: "var(--text-2)", fontWeight: 500 }}>Tokenized TSLA</strong> live on-chain</span>
+          <span className="hero-dot" />
+          <span>4 verified contracts</span>
+          <span className="hero-dot" />
+          <span>ERC-3643-aligned</span>
+        </div>
+      </section>
 
-function RoleControl({ role, setRole, isOwner }: { role: Role; setRole: (r: Role) => void; isOwner: boolean }) {
-  const tab = (value: Role, label: string, enabled: boolean): React.ReactNode => {
-    const active = role === value;
-    return (
-      <button
-        role="tab"
-        aria-selected={active}
-        aria-disabled={!enabled}
-        tabIndex={enabled ? 0 : -1}
-        onClick={() => enabled && setRole(value)}
-        className={active ? "btn btn-primary" : "btn btn-ghost"}
-        style={{
-          flex: 1,
-          border: "none",
-          borderBottom: active ? "1px solid var(--amber)" : "1px solid transparent",
-          cursor: enabled ? "pointer" : "not-allowed",
-          opacity: enabled ? 1 : 0.5,
-        }}
-      >
-        {label}
-      </button>
-    );
-  };
-  return (
-    <div role="tablist" aria-label="View role" style={{
-      display: "flex", border: "1px solid var(--border)", background: "var(--surface-1)", marginBottom: "var(--sp-4)",
-    }}>
-      {tab("investor", "Investor", true)}
-      {tab("issuer", "Issuer Console", isOwner)}
-    </div>
-  );
-}
+      {/* GATE DEMONSTRATION */}
+      <GateSection />
 
-function Dashboard() {
-  const { address } = useAccount();
-  const [role, setRole] = useState<Role>("investor");
+      {/* THE PROBLEM */}
+      <section className="lp-band" style={{ padding: "var(--sp-16) 0" }}>
+        <div className="lp-section">
+          <div className="section-eyebrow">The problem</div>
+          <h2 className="section-title">A tokenized stock is a bearer asset. Securities law is not.</h2>
+          <p className="section-lead">
+            Move a tokenized equity to the wrong wallet — an unverified holder, a sanctioned
+            jurisdiction, a non-accredited buyer — and the issuer is the one in breach. Bolt-on
+            allowlists drift out of sync and live off-chain, where they can&apos;t actually stop a
+            transfer. Compliance has to be enforced where settlement happens: in the token itself.
+          </p>
+        </div>
+      </section>
 
-  const { data: owner } = useReadContract({
-    address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "owner",
-    query: { enabled: !!addresses.rwaToken },
-  });
-  const isOwner = !!address && !!owner && (address as string).toLowerCase() === (owner as string).toLowerCase();
+      {/* HOW IT WORKS */}
+      <section className="lp-band" style={{ padding: "var(--sp-16) 0" }}>
+        <div className="lp-section">
+          <div className="section-eyebrow">How it works</div>
+          <h2 className="section-title">Every transfer runs the gate before it settles.</h2>
+          <div className="lp-flow" style={{ margin: "var(--sp-8) 0 var(--sp-10)" }}>
+            <span className="lp-flow-node">transfer()</span>
+            <span className="lp-flow-arrow">→</span>
+            <span className="lp-flow-node">ComplianceEngine.canTransfer</span>
+            <span className="lp-flow-arrow">→</span>
+            <span className="lp-flow-node">modules</span>
+            <span className="lp-flow-arrow">→</span>
+            <span className="lp-flow-node">KYC attestation</span>
+          </div>
+          <div className="lp-grid-3">
+            <div className="lp-step">
+              <div className="lp-step-num">01</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--text-1)", marginBottom: 8 }}>Token calls the engine</div>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", lineHeight: 1.6 }}>
+                The RWA token hooks every transfer into <span className="mono">ComplianceEngine.canTransfer(from, to, amount)</span> before any balance changes.
+              </p>
+            </div>
+            <div className="lp-step">
+              <div className="lp-step-num">02</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--text-1)", marginBottom: 8 }}>Modules vote</div>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", lineHeight: 1.6 }}>
+                Country restriction, accredited-investor, and holder-cap modules each check the parties. Any failure reverts with a reason.
+              </p>
+            </div>
+            <div className="lp-step">
+              <div className="lp-step-num">03</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--text-1)", marginBottom: 8 }}>Attestations decide</div>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", lineHeight: 1.6 }}>
+                Verification comes from on-chain KYC attestations in an EAS-compatible registry — the same primitive ERC-3643 issuers already trust.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  // If a non-owner is somehow on the issuer tab (e.g. wallet switch), fall back.
-  useEffect(() => {
-    if (role === "issuer" && !isOwner) setRole("investor");
-  }, [role, isOwner]);
+      {/* PROOF STRIP */}
+      <section className="lp-band" style={{ padding: "var(--sp-16) 0" }}>
+        <div className="lp-section">
+          <div className="section-eyebrow">Live &amp; proven on Robinhood Chain</div>
+          <h2 className="section-title">Four contracts, deployed and verifiable.</h2>
+          <p className="section-lead" style={{ marginBottom: "var(--sp-8)" }}>
+            This isn&apos;t a mock. The token, engine, country module, and attestation registry are
+            live on Robinhood Chain testnet. Open any of them on the explorer.
+          </p>
+          <div className="proof-grid">
+            {PROOF.map((p) => (
+              <a key={p.addr} href={`${CHAIN_EXPLORER}/address/${p.addr}`} target="_blank" rel="noopener noreferrer" className="proof-row" style={{ textDecoration: "none" }}>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{p.label}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--amber)" }}>{p.addr.slice(0, 6)}…{p.addr.slice(-4)} ↗</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
-  return (
-    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "var(--sp-10) var(--sp-6) var(--sp-16)" }}>
-      <WrongChainBanner />
-      <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 500, color: "var(--text-1)", marginBottom: "var(--sp-2)", letterSpacing: "-0.01em" }}>
-        Compliance dashboard
-      </h1>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", marginBottom: "var(--sp-8)" }}>
-        Verify before you transfer — the compliance layer for tokenized equity.
-      </p>
-
-      <RoleControl role={role} setRole={setRole} isOwner={isOwner} />
-
-      {role === "issuer" && isOwner ? (
-        <IssuerConsole />
-      ) : (
-        <>
-          <InvestorView />
-          {!isOwner && (
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-3)", marginTop: "var(--sp-6)", textAlign: "center" }}>
-              Connect the issuer wallet to manage compliance.
-            </p>
-          )}
-        </>
-      )}
-
-      {/* Footer */}
-      <footer style={{ marginTop: "var(--sp-16)", paddingTop: "var(--sp-6)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--sp-4)" }}>
+      {/* FOOTER */}
+      <footer className="lp-footer">
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 14, color: "var(--text-3)" }}>
           Covenant — Compliance layer for tokenized stocks · Robinhood Chain
         </span>
-        <div style={{ display: "flex", gap: "var(--sp-5)" }}>
-          <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-            GitHub
-          </a>
-          <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-            Explorer
-          </a>
+        <div style={{ display: "flex", gap: "var(--sp-6)" }}>
+          <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" className="mono-link">GitHub</a>
+          <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer" className="mono-link">Explorer</a>
+          <Link href="/docs" className="mono-link">Docs</Link>
         </div>
       </footer>
     </div>
   );
-}
-
-export default function Home() {
-  const { isConnected } = useAccount();
-  // Match the server render (disconnected) on the first client paint, then reveal the
-  // connection-dependent view. Prevents a hydration mismatch when wagmi auto-reconnects.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <GateHero />;
-  return isConnected ? <Dashboard /> : <GateHero />;
 }

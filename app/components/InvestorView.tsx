@@ -10,7 +10,7 @@ import { useToast } from "./Toast";
 /* ---------------------------------------------------------------- *
  *  Identity strip — token name/symbol + hero balance + paused badge
  * ---------------------------------------------------------------- */
-function IdentityStrip() {
+export function IdentityStrip() {
   const { address } = useAccount();
   const { data: tokenName } = useReadContract({ address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "name" });
   const { data: tokenSymbol } = useReadContract({ address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "symbol" });
@@ -104,7 +104,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function CredentialCard() {
+export function CredentialCard() {
   const { address } = useAccount();
 
   const { data: uid } = useReadContract({
@@ -218,7 +218,7 @@ function fieldLabel(text: string): React.ReactNode {
   );
 }
 
-function TheGate() {
+export function TheGate() {
   const { address } = useAccount();
   const { toast } = useToast();
   const [recipient, setRecipient] = useState("");
