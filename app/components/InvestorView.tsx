@@ -45,7 +45,7 @@ function IdentityStrip() {
           </span>
           {paused === true && (
             <span style={{
-              fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--red)",
+              fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--red)",
               background: "var(--red-dim)", border: "1px solid var(--red-border)",
               padding: "2px 8px", letterSpacing: "0.06em", textTransform: "uppercase",
             }}>
@@ -160,7 +160,7 @@ function CredentialCard() {
               {cred!.investorTypeLabel}
               {cred!.accredited && (
                 <span style={{
-                  marginLeft: 8, fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 500,
+                  marginLeft: 8, fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
                   color: "var(--amber)", background: "var(--amber-dim)", border: "1px solid var(--amber-border)",
                   padding: "1px 8px", verticalAlign: "middle",
                 }}>
@@ -293,7 +293,7 @@ function TheGate() {
       boxShadow: "0 0 0 1px var(--amber-border), 0 24px 70px -28px rgba(201,165,92,0.30)",
     }}>
       <div style={{ marginBottom: "var(--sp-6)" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.8, marginBottom: "var(--sp-3)" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.8, marginBottom: "var(--sp-3)" }}>
           Live compliance check
         </div>
         <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 500, color: "var(--text-1)", marginBottom: "var(--sp-2)" }}>

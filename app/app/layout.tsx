@@ -67,7 +67,7 @@ export default function RootLayout({
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 500,
                     color: "var(--amber)",
                     background: "var(--amber-dim)",

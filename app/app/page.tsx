@@ -41,7 +41,7 @@ function GateHero() {
       <div className="gate-hero">
         {/* LEFT: Denied zone */}
         <div className="gate-hero-denied">
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 24 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 24 }}>
             Without verification
           </span>
           <div style={{ width: 44, height: 44, border: "1px solid var(--red-border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
@@ -76,7 +76,7 @@ function GateHero() {
         <div className="gate-hero-approved">
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, var(--amber-glow), transparent)", pointerEvents: "none" }} />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.7, marginBottom: 24, display: "block" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.7, marginBottom: 24, display: "block" }}>
               With verification
             </span>
             <div style={{ width: 44, height: 44, border: "1px solid var(--green-border)", background: "var(--green-dim)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
