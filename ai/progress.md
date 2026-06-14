@@ -1,54 +1,38 @@
-# Verigate — Progress
+# Verigate — Progress / Handover
 
-## Last Session Summary
-- **Date:** 2026-03-31
-- **What was done:** Full product built from zero to submission in one session.
+## What this is now
+Verigate = **compliance layer for tokenized stocks**, targeting the Arbitrum Open House London
+Buildathon (reserved Robinhood Chain prize lane). Ported from the BSC/BAS original to a
+chain-neutral, EAS-compatible attestation model. Plan: `ai/plan.md`. Deployments: `ai/deployments.md`.
 
-### Accomplishments:
-1. Hackathon discovery + research (RWA Demo Day, 5 comparables, competitive analysis)
-2. Architecture design (3 rounds of critique, Chainlink ACE analysis, BAS integration decision)
-3. 7 Solidity contracts + 3 interfaces written and tested (75 tests, Slither clean)
-4. 4 security bugs found and fixed via manual audit (forceTransfer holder tracking, MaxHolders access control, sender country check, tokenIndex ambiguity)
-5. Deployed to BSC testnet (v2 with correct Verigate name)
-6. BAS schema registered, real attestations created, Phase 1 Gate passed on-chain
-7. Full design pipeline: 5 comparables researched → 3 proposals generated → hybrid built
-8. Gate metaphor hero, Crimson Pro serif, amber duotone, WCAG AA verified
-9. Mobile responsive, auto chain-switch, wrong-chain banner
-10. GitHub Pages deployed and live
-11. Pitch deck (10 slides, PDF)
-12. Google Form submitted
-13. Demo video (79s, 7 clips, ElevenLabs audio, ffmpeg assembly)
+## Done (verified)
+- **Phase 0:** baseline 75/75 tests green; security playbook installed; Robinhood Chain +
+  Arbitrum network configs added to `foundry.toml`.
+- **Phase 1:** attestation layer ported `IBAS` → `IAttestationRegistry` (chain-neutral, EAS struct
+  field order corrected to match canonical EAS). New `VerigateAttester.sol` (EAS-compatible,
+  permissioned attester for chains without canonical EAS). **91/91 tests green** (75 + 16 new,
+  incl. a full-stack integration test against the real attester).
+- **Phase 2 (partial):** deployed live to **Arbitrum Sepolia** + proved the core flow on-chain
+  (block → attest → transfer-succeeds, plus the KYC'd-but-sanctioned-jurisdiction block). All
+  addresses + tx hashes in `ai/deployments.md`.
 
-### What's next:
-- Improve pitch deck before April 8 pitch day (add tokenomics slide, product screenshot, architecture diagram)
-- Test connected wallet flow with MetaMask on desktop
-- Record a higher-quality demo video with real wallet screenshots (current uses Pillow-generated frames for dashboard)
-- Create DoraHacks BUIDL page for additional visibility
+## Blocked / needs user
+- **Robinhood Chain deploy** needs the deployer funded from the faucet
+  (`https://faucet.testnet.chain.robinhood.com`, address `0xf9946775891a24462cD4ec885d0D4E2675C84355`,
+  currently 0 ETH). RPC confirmed live: `https://rpc.testnet.chain.robinhood.com` (chainId 46630).
+- **Arbiscan verification** needs `ARBISCAN_API_KEY` (free) for verified source on the explorer.
 
-### Blockers/Issues:
-- Keynote not available in user's region (used reportlab for PDF instead)
-- Mobile wallet showed 500 error when on wrong chain (fixed with auto chain-switch)
-- Pillow-generated dashboard frames look synthetic compared to real screenshots
-- Tokenomics section in pitch deck is one sentence — judges require a full section
+## Next
+- Phase 2 finish: fund + deploy + prove on Robinhood Chain (the reserved-prize chain).
+- Phase 3: frontend demo wired to the live contracts + README rewrite (H1 "compliance layer for
+  tokenized stocks") + verified contracts.
+- Phase 4: design polish, 2-min Loom, deck refresh, distribution.
 
-## Deployed Contracts (BSC Testnet, Chain 97)
-- **RWATokenFactory:** `0x60aa769416EfBbc0A6BC9cb454758dE6f76D52B5` (verified)
-- **RWAToken (VGATE):** `0xE7f32bcBCDBBEf25900d5f9545C20CFC2d61A711`
-- **ComplianceEngine:** `0x5Bf71EEdA3CA10ae52de3eA4aeA4b14b9d0FDba7`
-- **CountryRestriction:** `0x742D04D05f303Cb95E805Fb6B8A6C5035e6c41f8`
-- **AccreditedInvestor:** `0x77C3c50106c84585d6242Cb44876aDE3a445ED26`
-- **MaxHolders:** `0xE5c8383bBDbf1767D285e12eAAB32038Fe6A1424`
-- **BAS Schema UID:** `0xa72370606965bcdb25a1930828933a52fdcb9c2c59742c2806b5af35d4e87989`
-
-## Links
-- **Live Demo:** https://yonkoo11.github.io/verigate/
-- **Repo:** https://github.com/Yonkoo11/verigate
-- **Demo Video:** video/verigate-demo.mp4
-- **Pitch Deck:** Verigate-Pitch-Deck.pdf
-
-## Handover Notes
-- The deployer wallet private key is in `contracts/.env` (gitignored)
-- Test recipient `0x2222...2222` has a valid attestation and can receive transfers
-- Test recipient `0x3333...3333` has NO attestation and will be blocked
-- The issuer admin panel only appears when connected as the deployer/owner
-- Dashboard frames in the demo video are Pillow-generated, not real screenshots — re-record with MetaMask connected for better quality
+## Key facts
+- Deployer: `0xf9946775891a24462cD4ec885d0D4E2675C84355` (key in env `DEPLOYER_PRIVATE_KEY`; never read/print it).
+- KYC schema: `(uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry)`,
+  schema id = keccak256("verigate.kyc.v1").
+- Canonical EAS (Arbitrum): `0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458` — pass via env
+  `ATTESTATION_REGISTRY` to use instead of deploying VerigateAttester.
+- Gotcha: in forge scripts, don't interleave `canTransfer` view reads between broadcast txs
+  (simulation snapshot mismatch); `SeedDemo.s.sol` is now broadcast-clean.

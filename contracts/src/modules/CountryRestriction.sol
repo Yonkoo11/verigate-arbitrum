@@ -3,10 +3,10 @@ pragma solidity ^0.8.24;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IComplianceModule} from "../interfaces/IComplianceModule.sol";
-import {IBAS, Attestation} from "../interfaces/IBAS.sol";
+import {IAttestationRegistry, Attestation} from "../interfaces/IAttestationRegistry.sol";
 
 /// @title CountryRestriction - Block transfers to/from sanctioned jurisdictions
-/// @notice Reads the recipient's BAS attestation to extract their country code,
+/// @notice Reads the recipient's attestation to extract their country code,
 ///         then checks it against a configurable blocklist.
 /// @dev Country is expected in the attestation data as: abi.encode(uint8 kycLevel, bytes2 country, ...)
 ///      The schema field order must match: (uint8, bytes2, bool, uint8, uint64)
@@ -74,7 +74,7 @@ contract CountryRestriction is IComplianceModule, Ownable {
         address, /* from */
         address, /* to */
         uint256, /* amount */
-        IBAS bas,
+        IAttestationRegistry registry,
         bytes32 fromAttestationUID,
         bytes32 toAttestationUID
     ) external view override returns (bool compliant, string memory reason) {
@@ -85,15 +85,15 @@ contract CountryRestriction is IComplianceModule, Ownable {
 
         // Check sender if configured
         if (checkSenderCountry) {
-            (bool ok, string memory err) = _checkCountry(bas, fromAttestationUID, "sender");
+            (bool ok, string memory err) = _checkCountry(registry, fromAttestationUID, "sender");
             if (!ok) return (false, err);
         }
 
         // Always check recipient
-        return _checkCountry(bas, toAttestationUID, "recipient");
+        return _checkCountry(registry, toAttestationUID, "recipient");
     }
 
-    function _checkCountry(IBAS bas, bytes32 uid, string memory party)
+    function _checkCountry(IAttestationRegistry registry, bytes32 uid, string memory party)
         internal
         view
         returns (bool, string memory)
@@ -102,11 +102,11 @@ contract CountryRestriction is IComplianceModule, Ownable {
             return (false, string.concat("CountryRestriction: ", party, " has no attestation"));
         }
 
-        if (!bas.isAttestationValid(uid)) {
+        if (!registry.isAttestationValid(uid)) {
             return (false, string.concat("CountryRestriction: ", party, " attestation invalid or revoked"));
         }
 
-        Attestation memory att = bas.getAttestation(uid);
+        Attestation memory att = registry.getAttestation(uid);
 
         if (att.expirationTime != 0 && att.expirationTime < block.timestamp) {
             return (false, string.concat("CountryRestriction: ", party, " attestation expired"));

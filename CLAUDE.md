@@ -1,3 +1,18 @@
+## SECURITY — KEYS NEVER IN REPO OR CONTEXT (BLOCKING)
+
+The deployer + operator + RPC keys live ONLY in `~/.zshenv`. Hard rules:
+
+- **NEVER read `~/.zshenv`, `~/.zshrc`, `~/.zprofile`, `~/.bashrc`, `~/.bash_profile`, `~/.netrc`, `~/.npmrc`, `~/.git-credentials`, SSH keys, `*.key`, `*.pem`, or any `keystore/*` file.** Not `Read`, not `cat`, not `head`, not `grep -v`. Project + global hooks block these.
+- **NEVER print, echo, or log key values.** `echo $KEY`, `print(os.getenv("KEY"))`, `vm.toString(pk)`, `console.log(process.env.KEY)` are banned.
+- **NEVER commit `.env*`, `*.key`, `*.pem`, `keystore/`, `secrets/`** — covered by `.gitignore`. Verify `git diff --cached` before every save point.
+- **NEVER use `git add -A` for the first save point in a new project.** Add by explicit file name.
+- **Foundry deploys use `vm.envUint("DEPLOYER_PRIVATE_KEY")`** — reads process env at runtime. Never hardcode. Never `--private-key 0x...` on the CLI either.
+- **Python agents use `os.getenv("OPERATOR_PRIVATE_KEY")`** — same pattern. Never `dotenv.load_dotenv("~/.zshenv")`. Never shell out to echo env vars.
+- **Check var presence without seeing value:** `[ -n "$VARNAME" ] && echo "set"` or `echo "${#VARNAME}"` (length only).
+- **If a key ever surfaces in chat or output, STOP. Tell the user to rotate. Do not paginate the value back into context.**
+
+Full playbook: `SECURITY.md`. Read it before any deploy or signing work.
+
 # Verigate
 
 Lightweight, BNB-native compliance middleware for tokenized real-world assets using BAS (BNB Attestation Service).

@@ -3,19 +3,19 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {MaxHolders} from "../../src/modules/MaxHolders.sol";
-import {IBAS} from "../../src/interfaces/IBAS.sol";
-import {MockBAS} from "../mocks/MockBAS.sol";
+import {IAttestationRegistry} from "../../src/interfaces/IAttestationRegistry.sol";
+import {MockAttestationRegistry} from "../mocks/MockAttestationRegistry.sol";
 
 contract MaxHoldersTest is Test {
     MaxHolders module;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     address token = address(0x1);
     address alice = address(0xB);
     address bob = address(0xC);
     address charlie = address(0xD);
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         module = new MaxHolders(2); // Max 2 holders
         module.initialize(token);
     }
@@ -79,7 +79,7 @@ contract MaxHoldersTest is Test {
 
         // Now charlie (not a holder) should be blocked
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, charlie, 100, IBAS(address(bas)), bytes32(0), bytes32(0));
+            module.checkCompliance(alice, charlie, 100, IAttestationRegistry(address(bas)), bytes32(0), bytes32(0));
         assertFalse(compliant);
         assertEq(reason, "MaxHolders: maximum holder count reached");
     }
@@ -92,7 +92,7 @@ contract MaxHoldersTest is Test {
 
         // Transfer between existing holders is fine
         (bool compliant,) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), bytes32(0));
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), bytes32(0));
         assertTrue(compliant);
     }
 

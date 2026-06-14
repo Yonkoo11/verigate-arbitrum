@@ -3,19 +3,19 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {CountryRestriction} from "../../src/modules/CountryRestriction.sol";
-import {MockBAS} from "../mocks/MockBAS.sol";
-import {IBAS} from "../../src/interfaces/IBAS.sol";
+import {MockAttestationRegistry} from "../mocks/MockAttestationRegistry.sol";
+import {IAttestationRegistry} from "../../src/interfaces/IAttestationRegistry.sol";
 
 contract CountryRestrictionTest is Test {
     CountryRestriction module;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     address issuer = address(0xA);
     address alice = address(0xB);
     address bob = address(0xC);
     bytes32 schema = keccak256("RWACompliance");
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         vm.prank(issuer);
         module = new CountryRestriction(issuer, false);
     }
@@ -48,7 +48,7 @@ contract CountryRestrictionTest is Test {
     }
 
     function test_noBlockedCountries_passes() public view {
-        (bool compliant,) = module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), bytes32(0));
+        (bool compliant,) = module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), bytes32(0));
         assertTrue(compliant);
     }
 
@@ -60,7 +60,7 @@ contract CountryRestrictionTest is Test {
         bytes32 uid = bas.createAttestation(schema, bob, address(this), 0, true, data);
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: recipient country is restricted");
     }
@@ -72,7 +72,7 @@ contract CountryRestrictionTest is Test {
         bytes memory data = bas.encodeComplianceData(1, bytes2("US"), true, 1, 0);
         bytes32 uid = bas.createAttestation(schema, bob, address(this), 0, true, data);
 
-        (bool compliant,) = module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+        (bool compliant,) = module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertTrue(compliant);
     }
 
@@ -81,7 +81,7 @@ contract CountryRestrictionTest is Test {
         module.blockCountry(bytes2("KP"));
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), bytes32(0));
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), bytes32(0));
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: recipient has no attestation");
     }
@@ -95,7 +95,7 @@ contract CountryRestrictionTest is Test {
         bas.revokeAttestation(uid);
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: recipient attestation invalid or revoked");
     }
@@ -110,7 +110,7 @@ contract CountryRestrictionTest is Test {
         vm.warp(block.timestamp + 100);
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: recipient attestation expired");
     }
@@ -147,7 +147,7 @@ contract CountryRestrictionTest is Test {
         bytes32 recipientUID = bas.createAttestation(schema, bob, address(this), 0, true, recipientData);
 
         (bool compliant, string memory reason) =
-            senderModule.checkCompliance(alice, bob, 100, IBAS(address(bas)), senderUID, recipientUID);
+            senderModule.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), senderUID, recipientUID);
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: sender country is restricted");
     }
@@ -161,7 +161,7 @@ contract CountryRestrictionTest is Test {
         bytes32 recipientUID = bas.createAttestation(schema, bob, address(this), 0, true, recipientData);
 
         (bool compliant, string memory reason) =
-            senderModule.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), recipientUID);
+            senderModule.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), recipientUID);
         assertFalse(compliant);
         assertEq(reason, "CountryRestriction: sender has no attestation");
     }
@@ -179,7 +179,7 @@ contract CountryRestrictionTest is Test {
         bytes32 recipientUID = bas.createAttestation(schema, bob, address(this), 0, true, recipientData);
 
         (bool compliant,) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), senderUID, recipientUID);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), senderUID, recipientUID);
         assertTrue(compliant); // Passes because sender check is off
     }
 }

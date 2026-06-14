@@ -4,25 +4,25 @@ pragma solidity ^0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
 import {IComplianceModule} from "../src/interfaces/IComplianceModule.sol";
-import {IBAS} from "../src/interfaces/IBAS.sol";
-import {MockBAS} from "./mocks/MockBAS.sol";
+import {IAttestationRegistry} from "../src/interfaces/IAttestationRegistry.sol";
+import {MockAttestationRegistry} from "./mocks/MockAttestationRegistry.sol";
 import {CountryRestriction} from "../src/modules/CountryRestriction.sol";
 
 contract ComplianceEngineTest is Test {
     ComplianceEngine engine;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     address issuer = address(0xA);
     address alice = address(0xB);
     address bob = address(0xC);
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         vm.prank(issuer);
         engine = new ComplianceEngine(address(bas), issuer);
     }
 
     function test_constructor_setsBAS() public view {
-        assertEq(address(engine.bas()), address(bas));
+        assertEq(address(engine.registry()), address(bas));
     }
 
     function test_constructor_setsOwner() public view {

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {IComplianceModule} from "../interfaces/IComplianceModule.sol";
-import {IBAS} from "../interfaces/IBAS.sol";
+import {IAttestationRegistry} from "../interfaces/IAttestationRegistry.sol";
 
 /// @title MaxHolders - Cap the total number of token holders
 /// @notice Many securities regulations limit the number of holders before requiring
@@ -51,7 +51,7 @@ contract MaxHolders is IComplianceModule {
         address, /* from */
         address to,
         uint256, /* amount */
-        IBAS, /* bas */
+        IAttestationRegistry, /* registry */
         bytes32, /* fromAttestationUID */
         bytes32 /* toAttestationUID */
     ) external view override returns (bool compliant, string memory reason) {

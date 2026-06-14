@@ -5,15 +5,15 @@ import {Test} from "forge-std/Test.sol";
 import {RWATokenFactory} from "../src/RWATokenFactory.sol";
 import {RWAToken} from "../src/RWAToken.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
-import {MockBAS} from "./mocks/MockBAS.sol";
+import {MockAttestationRegistry} from "./mocks/MockAttestationRegistry.sol";
 
 contract RWATokenFactoryTest is Test {
     RWATokenFactory factory;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     address issuer = address(0xA);
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         factory = new RWATokenFactory(address(bas));
     }
 

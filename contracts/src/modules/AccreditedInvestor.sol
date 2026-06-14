@@ -2,10 +2,10 @@
 pragma solidity ^0.8.24;
 
 import {IComplianceModule} from "../interfaces/IComplianceModule.sol";
-import {IBAS, Attestation} from "../interfaces/IBAS.sol";
+import {IAttestationRegistry, Attestation} from "../interfaces/IAttestationRegistry.sol";
 
 /// @title AccreditedInvestor - Only allow transfers to accredited investors
-/// @notice Reads the recipient's BAS attestation to verify accredited investor status.
+/// @notice Reads the recipient's attestation to verify accredited investor status.
 /// @dev Can be configured to check sender, recipient, or both.
 contract AccreditedInvestor is IComplianceModule {
     bool public immutable checkSender;
@@ -23,24 +23,24 @@ contract AccreditedInvestor is IComplianceModule {
         address, /* from */
         address, /* to */
         uint256, /* amount */
-        IBAS bas,
+        IAttestationRegistry registry,
         bytes32 fromAttestationUID,
         bytes32 toAttestationUID
     ) external view override returns (bool compliant, string memory reason) {
         if (checkSender) {
-            (bool ok, string memory err) = _checkAccredited(bas, fromAttestationUID, "sender");
+            (bool ok, string memory err) = _checkAccredited(registry, fromAttestationUID, "sender");
             if (!ok) return (false, err);
         }
 
         if (checkRecipient) {
-            (bool ok, string memory err) = _checkAccredited(bas, toAttestationUID, "recipient");
+            (bool ok, string memory err) = _checkAccredited(registry, toAttestationUID, "recipient");
             if (!ok) return (false, err);
         }
 
         return (true, "");
     }
 
-    function _checkAccredited(IBAS bas, bytes32 uid, string memory party)
+    function _checkAccredited(IAttestationRegistry registry, bytes32 uid, string memory party)
         internal
         view
         returns (bool, string memory)
@@ -49,11 +49,11 @@ contract AccreditedInvestor is IComplianceModule {
             return (false, string.concat("AccreditedInvestor: ", party, " has no attestation"));
         }
 
-        if (!bas.isAttestationValid(uid)) {
+        if (!registry.isAttestationValid(uid)) {
             return (false, string.concat("AccreditedInvestor: ", party, " attestation invalid or revoked"));
         }
 
-        Attestation memory att = bas.getAttestation(uid);
+        Attestation memory att = registry.getAttestation(uid);
 
         if (att.expirationTime != 0 && att.expirationTime < block.timestamp) {
             return (false, string.concat("AccreditedInvestor: ", party, " attestation expired"));

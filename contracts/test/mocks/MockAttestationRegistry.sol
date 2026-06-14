@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {IBAS, Attestation} from "../../src/interfaces/IBAS.sol";
+import {IAttestationRegistry, Attestation} from "../../src/interfaces/IAttestationRegistry.sol";
 
-/// @title MockBAS - Mock BNB Attestation Service for testing
+/// @title MockAttestationRegistry - Mock BNB Attestation Service for testing
 /// @dev Allows creating fake attestations for unit testing without a real BAS deployment
-contract MockBAS is IBAS {
+contract MockAttestationRegistry is IAttestationRegistry {
     mapping(bytes32 uid => Attestation) private _attestations;
     uint256 private _nonce;
 

@@ -7,12 +7,12 @@ import {ComplianceEngine} from "../src/ComplianceEngine.sol";
 import {IComplianceModule} from "../src/interfaces/IComplianceModule.sol";
 import {CountryRestriction} from "../src/modules/CountryRestriction.sol";
 import {MaxHolders} from "../src/modules/MaxHolders.sol";
-import {MockBAS} from "./mocks/MockBAS.sol";
+import {MockAttestationRegistry} from "./mocks/MockAttestationRegistry.sol";
 
 contract RWATokenTest is Test {
     RWAToken token;
     ComplianceEngine engine;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     CountryRestriction countryModule;
 
     address issuer = address(0xA);
@@ -23,7 +23,7 @@ contract RWATokenTest is Test {
     bytes32 schema = keccak256("RWACompliance");
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         vm.startPrank(issuer);
         engine = new ComplianceEngine(address(bas), issuer);
         token = new RWAToken("Test RWA Token", "tRWA", address(engine), issuer);
@@ -243,7 +243,7 @@ contract RWATokenTest is Test {
 contract RWATokenMaxHoldersTest is Test {
     RWAToken token;
     ComplianceEngine engine;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     MaxHolders maxHolders;
 
     address issuer = address(0xA);
@@ -253,7 +253,7 @@ contract RWATokenMaxHoldersTest is Test {
     bytes32 schema = keccak256("RWACompliance");
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         vm.startPrank(issuer);
         engine = new ComplianceEngine(address(bas), issuer);
         token = new RWAToken("Max Test", "MAX", address(engine), issuer);

@@ -13,7 +13,7 @@ import {MaxHolders} from "./modules/MaxHolders.sol";
 contract RWATokenFactory {
     // --- Storage ---
 
-    address public immutable bas;
+    address public immutable registry;
 
     struct DeployedToken {
         address token;
@@ -40,10 +40,10 @@ contract RWATokenFactory {
 
     // --- Constructor ---
 
-    /// @param _bas BAS contract address for this chain
-    constructor(address _bas) {
-        require(_bas != address(0), "Zero BAS address");
-        bas = _bas;
+    /// @param _registry attestation registry address for this chain
+    constructor(address _registry) {
+        require(_registry != address(0), "Zero registry address");
+        registry = _registry;
     }
 
     // --- Deployment ---
@@ -67,7 +67,7 @@ contract RWATokenFactory {
     /// @return engine The deployed ComplianceEngine address
     function deploy(DeployParams calldata params) external returns (address token, address engine) {
         // Deploy ComplianceEngine (factory as owner for setup, then transfer)
-        ComplianceEngine complianceEngine = new ComplianceEngine(bas, address(this));
+        ComplianceEngine complianceEngine = new ComplianceEngine(registry, address(this));
 
         // Deploy RWAToken (factory as owner for setup, then transfer to issuer)
         RWAToken rwaToken = new RWAToken(params.name, params.symbol, address(complianceEngine), address(this));

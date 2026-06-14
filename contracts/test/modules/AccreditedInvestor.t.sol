@@ -3,18 +3,18 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {AccreditedInvestor} from "../../src/modules/AccreditedInvestor.sol";
-import {MockBAS} from "../mocks/MockBAS.sol";
-import {IBAS} from "../../src/interfaces/IBAS.sol";
+import {MockAttestationRegistry} from "../mocks/MockAttestationRegistry.sol";
+import {IAttestationRegistry} from "../../src/interfaces/IAttestationRegistry.sol";
 
 contract AccreditedInvestorTest is Test {
     AccreditedInvestor module;
-    MockBAS bas;
+    MockAttestationRegistry bas;
     address alice = address(0xB);
     address bob = address(0xC);
     bytes32 schema = keccak256("RWACompliance");
 
     function setUp() public {
-        bas = new MockBAS();
+        bas = new MockAttestationRegistry();
         module = new AccreditedInvestor(false, true); // Check recipient only
     }
 
@@ -22,7 +22,7 @@ contract AccreditedInvestorTest is Test {
         bytes memory data = bas.encodeComplianceData(2, bytes2("US"), true, 1, 0);
         bytes32 uid = bas.createAttestation(schema, bob, address(this), 0, true, data);
 
-        (bool compliant,) = module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+        (bool compliant,) = module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertTrue(compliant);
     }
 
@@ -31,14 +31,14 @@ contract AccreditedInvestorTest is Test {
         bytes32 uid = bas.createAttestation(schema, bob, address(this), 0, true, data);
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertFalse(compliant);
         assertEq(reason, "AccreditedInvestor: recipient is not accredited");
     }
 
     function test_noAttestation_blocks() public {
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), bytes32(0));
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), bytes32(0));
         assertFalse(compliant);
         assertEq(reason, "AccreditedInvestor: recipient has no attestation");
     }
@@ -52,7 +52,7 @@ contract AccreditedInvestorTest is Test {
         bytes memory bobData = bas.encodeComplianceData(2, bytes2("GB"), true, 1, 0);
         bytes32 bobUID = bas.createAttestation(schema, bob, address(this), 0, true, bobData);
 
-        (bool compliant,) = bothModule.checkCompliance(alice, bob, 100, IBAS(address(bas)), aliceUID, bobUID);
+        (bool compliant,) = bothModule.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), aliceUID, bobUID);
         assertTrue(compliant);
     }
 
@@ -66,7 +66,7 @@ contract AccreditedInvestorTest is Test {
         bytes32 bobUID = bas.createAttestation(schema, bob, address(this), 0, true, bobData);
 
         (bool compliant, string memory reason) =
-            bothModule.checkCompliance(alice, bob, 100, IBAS(address(bas)), aliceUID, bobUID);
+            bothModule.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), aliceUID, bobUID);
         assertFalse(compliant);
         assertEq(reason, "AccreditedInvestor: sender is not accredited");
     }
@@ -78,7 +78,7 @@ contract AccreditedInvestorTest is Test {
         vm.warp(block.timestamp + 100);
 
         (bool compliant, string memory reason) =
-            module.checkCompliance(alice, bob, 100, IBAS(address(bas)), bytes32(0), uid);
+            module.checkCompliance(alice, bob, 100, IAttestationRegistry(address(bas)), bytes32(0), uid);
         assertFalse(compliant);
         assertEq(reason, "AccreditedInvestor: recipient attestation expired");
     }

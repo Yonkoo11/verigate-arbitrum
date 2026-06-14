@@ -1,150 +1,75 @@
-# Verigate — Build Plan
+# Verigate → Robinhood Chain — Winning Plan
 
-## Build Order (enforced)
-1. Core action works end-to-end (contracts deploy, transfer blocked/allowed based on BAS attestation)
-2. Data flows correctly (real BAS attestation on BSC testnet, not mocks)
-3. Product complete (all submission-required features: contracts + demo frontend + pitch deck)
-4. Visual polish LAST
+**Event:** Arbitrum Open House London Buildathon
+**Prizes targeted:** Overall ($40K/$20K/$10K) — the reserved Robinhood Chain slot. Optional: Best Agentic ($15K) via WhaleIndex separately.
+**Thesis:** Robinhood Chain exists to host tokenized US equities (TSLA, AMZN). Those are securities — they legally cannot transfer to unverified / sanctioned / non-accredited wallets. Robinhood ships the *assets*; the *composable compliance layer* for the $1M third-party builder fund is missing. **Verigate is that layer.** At least 1 of 3 overall prizes is reserved for Robinhood Chain, and most entrants will build trading toys, not securities-grade infra.
 
----
+## Pitch
+"Compliance layer for tokenized stocks." A tokenized TSLA share reverts when sent to a non-KYC'd or sanctioned wallet, and succeeds once the issuer attests it — on-chain, verifiable, ERC-3643-aligned, reusable by any builder on the chain.
 
-## Phase 1: Smart Contracts (Core Action)
+## Deep Integration (load-bearing, the win condition)
+- **Robinhood Chain (5/5):** deployed ON it (chainID 46630); gates ITS asset type (a tokenized stock token modeled on TSLA); solves the exact gap its $1M builder fund leaves open. Remove the chain → no demo.
+- **Arbitrum / EAS (5/5):** Orbit chain + native **Ethereum Attestation Service** as the identity source on Arbitrum One/Sepolia (`0xbD75f629…c458`). Optional Stylus (Rust) module for gas-cheap compliance compute as the innovation flex.
+- One codebase covers BOTH reserved chains (Robinhood Chain + Arbitrum).
 
-### Step 1.1: Foundry Project Setup
-- Init Foundry project in `contracts/`
-- Add OpenZeppelin as dependency
-- Configure for BSC testnet (chain ID 97)
-- Create BAS interface (IBAS.sol) matching EAS-forked contract
+## Architecture port (BAS → chain-agnostic attestation)
+BAS is a fork of EAS with the identical Solidity interface, so this is a *generalization*, not a rewrite:
+1. `IBAS.sol` → `IAttestationRegistry.sol` — keep the EAS-identical `Attestation` struct + `getAttestation`/`isAttestationValid`.
+2. NEW `VerigateAttester.sol` — minimal EAS-compatible attester (attest / revoke / getAttestation / isAttestationValid) so the demo is self-contained on Robinhood Chain (canonical EAS likely not deployed there yet) while staying EAS-interface-compatible.
+3. Deploy script chain-detects the attestation source:
+   - 42161 / 421614 (Arbitrum One / Sepolia) → canonical EAS `0xbD75f629…c458`
+   - 46630 (Robinhood Chain testnet) → deploy `VerigateAttester`
+4. KYC schema in attestation `data`: `(bytes2 countryCode, bool accredited, uint8 investorType, uint64 kycExpiry)` — modules already decode `data`.
 
-### Step 1.2: BAS Interface + Schema
-```
-IBAS.sol — Interface to query BAS attestations
-- getAttestation(bytes32 uid) → Attestation struct
-- isAttestationValid(bytes32 uid) → bool
+## Build order (core → data → product → polish)
 
-RWAComplianceSchema:
-- kycLevel: uint8 (0=none, 1=basic, 2=enhanced)
-- country: bytes2 (ISO 3166-1 alpha-2)
-- accredited: bool
-- investorType: uint8 (0=retail, 1=professional, 2=institutional)
-- expiry: uint64
-```
+### Phase 0 — Baseline & setup (prove green before touching anything)
+- `forge build` + run all 75 tests → confirm green baseline (evidence, not assumption).
+- Run `~/System/scripts/hackathon-security-bootstrap.sh` (keys/.gitignore). Verify no `.env` tracked.
+- Add Robinhood Chain (46630) + Arbitrum Sepolia network config (RPC, explorer, faucet) to `foundry.toml` + memory. Pull exact RPC/explorer from hackathon resources / docs.chain.robinhood.com (faucet known: faucet.testnet.chain.robinhood.com).
+- **Gate:** 75/75 green locally.
 
-### Step 1.3: Compliance Engine
-```
-ComplianceEngine.sol
-- Manages list of compliance modules per token
-- canTransfer(from, to, amount) → bool (iterates modules)
-- addModule(IComplianceModule module)
-- removeModule(IComplianceModule module)
-- Owner: token issuer
-```
+### Phase 1 — Chain-agnostic attestation core (the port)
+- Generalize interface; ship `VerigateAttester.sol`; update `ComplianceEngine` + 3 modules + Factory + Token to the generic type (mechanical; logic unchanged).
+- Keep 75 tests green; add `VerigateAttester` unit tests + a fork/integration test against canonical EAS interface.
+- **Gate:** `forge test` green on ported suite (≥ 75, target +~10 new).
 
-### Step 1.4: Compliance Modules (start with 1, add 2 more after Phase 1 gate passes)
-```
-Module 1: CountryRestriction.sol
-- Issuer sets blocked country codes
-- On transfer: read recipient's BAS attestation → decode country → check against blocklist
-- If no attestation or expired → block
+### Phase 2 — Deploy to BOTH reserved chains (real, not mocks)
+- Deploy script: chain-detect attester; deploy Factory + a demo **tokenized-TSLA** token + all 3 modules.
+- Deploy to **Robinhood Chain testnet (46630)** — PRIMARY — and **Arbitrum Sepolia** — second reserved lane.
+- Verify contracts on both explorers.
+- Run the live success-test on-chain and capture tx hashes:
+  - transfer to non-KYC wallet → **reverts** (reason surfaced)
+  - issuer attests wallet → transfer **succeeds**
+  - sanctioned-country wallet WITH KYC → **reverts**
+- **Gate:** on-chain tx hashes proving block → attest → pass on Robinhood Chain.
 
-Module 2: AccreditedInvestor.sol (Phase 2)
-- Check BAS attestation accredited field = true
+### Phase 3 — Product complete (judge-facing surface)
+- Minimal Next.js demo (existing `app/`) wired to Robinhood Chain: connect wallet → see tokenized TSLA → attempt transfer (revert w/ reason) → issuer attests → retry (success). Real contracts, real testnet, no mocks.
+- README rewritten: H1 = "Compliance layer for tokenized stocks"; Robinhood Chain framing; reproduce steps; deployed addresses + explorer links.
+- Decide the "smart contract quality" flex: ERC-3643 interface conformance note (safe) and/or one Stylus(Rust) compliance module (stretch).
+- **Gate:** live demo URL runs the full flow without login.
 
-Module 3: MaxHolders.sol (Phase 2)
-- Count current holders, block if cap reached
-```
+### Phase 4 — Polish + communication pack (LAST)
+- `/design` pass on the demo UI.
+- 2-min Loom (problem → solution → demo → team); thumbnail = demo screenshot.
+- Refresh existing pitch deck → Robinhood Chain framing.
+- Distribution: post in Arbitrum/Robinhood Chain builder Discord with the live tx + tag (named channel, started before deadline).
+- Link tests, slop scrub, sponsor-depth verification.
 
-### Step 1.5: Compliant RWA Token
-```
-RWAToken.sol (ERC-20 + compliance hook)
-- Standard ERC-20 (mint, burn, transfer, approve)
-- Before transfer: call ComplianceEngine.canTransfer()
-- Issuer functions: pause, freeze address, force transfer (recovery)
-- NOT full ERC-3643 (too complex for Phase 1) — compatible interface, simpler internals
-```
+## Files touched
+- `contracts/src/interfaces/IBAS.sol` → `IAttestationRegistry.sol` (rename + generalize)
+- NEW `contracts/src/VerigateAttester.sol`
+- `contracts/src/ComplianceEngine.sol`, `modules/*.sol`, `RWATokenFactory.sol`, `RWAToken.sol` (interface type + wiring)
+- `contracts/script/Deploy.s.sol` (chain detect: EAS vs VerigateAttester; Robinhood/Arb)
+- `contracts/test/*` (rename + new attester/fork tests)
+- `foundry.toml`, `app/*` (frontend), `README.md`, `ai/memory.md`, `CLAUDE.md`
 
-### Step 1.6: Tests
-```
-test/RWAToken.t.sol
-- Test: transfer blocked when recipient has no attestation
-- Test: transfer succeeds when recipient has valid attestation
-- Test: transfer blocked when recipient's country is blocked
-- Test: transfer blocked when attestation expired
-- Test: issuer can freeze/unfreeze address
-- Test: issuer can force transfer (recovery)
-```
+## Risks (honest)
+- **EAS not on Robinhood Chain** → mitigated by shipping `VerigateAttester` (self-contained).
+- **Robinhood docs unreachable from here (ECONNREFUSED)** → confirm exact RPC/explorer from hackathon resources or paste via `!`; faucet is known.
+- **Real Robinhood stock tokens may be custodial/non-transferable** → frame for the THIRD-PARTY builder ecosystem ($1M fund) building DeFi on those assets, where composable secondary-market compliance is the real gap.
+- **Compliance-expertise gap** → we're infra (enforce); issuers / KYC providers configure.
 
-### Step 1.7: Deploy to BSC Testnet
-- Deploy BAS schema (register our RWACompliance schema)
-- Deploy ComplianceEngine
-- Deploy CountryRestriction module
-- Deploy RWAToken pointing to ComplianceEngine
-- Create test attestation using BAS SDK
-- Execute the core flow: transfer blocked → add attestation → transfer succeeds
-
-### Phase 1 Gate Check
-- [ ] Contracts compile
-- [ ] All tests pass
-- [ ] Deployed on BSC testnet
-- [ ] Core flow works: transfer() reverts → BAS attestation added → transfer() succeeds
-
----
-
-## Phase 2: Additional Modules + Frontend Demo
-
-### Step 2.1: AccreditedInvestor module
-### Step 2.2: MaxHolders module
-### Step 2.3: Token Factory (deploy new compliant tokens in one tx)
-
-### Step 2.4: Frontend Demo
-Simple Next.js app that shows:
-1. Connect wallet
-2. See RWA token balance
-3. Try to transfer → fails (show "Compliance check failed: no KYC attestation")
-4. Show BAS attestation status
-5. After attestation exists → transfer succeeds
-6. Issuer panel: add/remove compliance modules, set country restrictions
-
-Tech: Next.js, wagmi, viem, BNB Chain testnet
-
----
-
-## Phase 3: Pitch Deck + Submission
-
-### Pitch Deck (7 slides)
-1. **Problem:** $3B RWA on BNB Chain, no compliance standard. Simple whitelisting breaks for DeFi composability.
-2. **Solution:** Lightweight compliance middleware using BAS. 3 lines to add compliance to any RWA token.
-3. **How it works:** Architecture diagram (Token → Compliance Engine → BAS)
-4. **Market:** BNB Chain RWA growing $1B/quarter. $100M incentive program bringing new issuers. HK SFC 2026 legislation creates compliance demand.
-5. **Business model:** OSS contracts free. Managed deployments $2-5K/mo. Enterprise custom $10-50K.
-6. **Tokenomics:** No token at launch. Future governance token for module curation. ICC helps with timing.
-7. **Team + Roadmap:** Q2 2026 testnet + first 3 issuers. Q3 mainnet. Q4 cross-chain (opBNB).
-
-### Submission Checklist
-- [ ] DoraHacks BUIDL page created with description, demo, repo link
-- [ ] Google Form submitted (https://forms.gle/t87uDXQFspa8tyq36)
-- [ ] Pitch deck PDF attached
-- [ ] Demo video or live demo URL
-- [ ] Contracts verified on BSC testnet explorer
-- [ ] README with setup instructions
-
----
-
-## Phase 4: Polish (ONLY after Phase 3 complete)
-- Frontend visual cleanup
-- Demo video recording
-- Additional compliance modules
-- Documentation
-
----
-
-## NOT Building
-- Full ERC-3643 (12+ contracts) — too complex, interface-compatible subset instead
-- Cross-chain anything — BNB Chain only for now
-- Governance — premature
-- Token — premature
-- ONCHAINID — using BAS instead
-- Mobile — web only
-
-## Key Risk
-BAS testnet may not have the same attestation creation flow as mainnet. If we can't create test attestations via BAS SDK on testnet, we may need to mock the BAS interface for demo purposes. This is acceptable for a pitch competition but should be disclosed.
+## First execution chunk on approval
+Phase 0 → Phase 2 (port + deploy to Robinhood Chain testnet with on-chain proof). That is the load-bearing win; product/polish follow.

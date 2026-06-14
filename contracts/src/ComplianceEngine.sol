@@ -2,17 +2,17 @@
 pragma solidity ^0.8.24;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IBAS, Attestation} from "./interfaces/IBAS.sol";
+import {IAttestationRegistry, Attestation} from "./interfaces/IAttestationRegistry.sol";
 import {IComplianceModule} from "./interfaces/IComplianceModule.sol";
 
 /// @title ComplianceEngine - Modular compliance rule engine for RWA tokens
 /// @notice Manages a set of compliance modules and checks all of them on every transfer.
-///         Each module reads BAS attestations to verify investor eligibility.
+///         Each module reads attestations to verify investor eligibility.
 /// @dev The engine is owned by the token issuer who can add/remove modules and manage attestation mappings.
 contract ComplianceEngine is Ownable {
     // --- Storage ---
 
-    IBAS public immutable bas;
+    IAttestationRegistry public immutable registry;
     IComplianceModule[] public modules;
     mapping(address wallet => bytes32 attestationUID) public attestationUIDs;
 
@@ -32,11 +32,11 @@ contract ComplianceEngine is Ownable {
 
     // --- Constructor ---
 
-    /// @param _bas Address of the BAS contract on this chain
+    /// @param _registry Address of the attestation registry on this chain
     /// @param _owner Token issuer who controls compliance configuration
-    constructor(address _bas, address _owner) Ownable(_owner) {
-        if (_bas == address(0)) revert ZeroAddress();
-        bas = IBAS(_bas);
+    constructor(address _registry, address _owner) Ownable(_owner) {
+        if (_registry == address(0)) revert ZeroAddress();
+        registry = IAttestationRegistry(_registry);
     }
 
     // --- Module Management ---
@@ -74,9 +74,9 @@ contract ComplianceEngine is Ownable {
 
     // --- Attestation Management ---
 
-    /// @notice Map a wallet to its BAS attestation UID
+    /// @notice Map a wallet to its attestation UID
     /// @param wallet The wallet address
-    /// @param uid The BAS attestation UID
+    /// @param uid The attestation UID
     function setAttestationUID(address wallet, bytes32 uid) external onlyOwner {
         if (wallet == address(0)) revert ZeroAddress();
         attestationUIDs[wallet] = uid;
@@ -85,7 +85,7 @@ contract ComplianceEngine is Ownable {
 
     /// @notice Batch set attestation UIDs for multiple wallets
     /// @param wallets Array of wallet addresses
-    /// @param uids Array of BAS attestation UIDs
+    /// @param uids Array of attestation UIDs
     function batchSetAttestationUIDs(address[] calldata wallets, bytes32[] calldata uids) external onlyOwner {
         require(wallets.length == uids.length, "Length mismatch");
         for (uint256 i; i < wallets.length; i++) {
@@ -126,7 +126,7 @@ contract ComplianceEngine is Ownable {
         uint256 len = modules.length;
         for (uint256 i; i < len; i++) {
             (bool moduleCompliant, string memory moduleReason) =
-                modules[i].checkCompliance(from, to, amount, bas, fromUID, toUID);
+                modules[i].checkCompliance(from, to, amount, registry, fromUID, toUID);
 
             if (!moduleCompliant) {
                 return (false, moduleReason);

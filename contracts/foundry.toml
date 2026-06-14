@@ -16,6 +16,14 @@ runs = 256
 
 [rpc_endpoints]
 bsc_testnet = "${BSC_TESTNET_RPC_URL}"
+arbitrum_sepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
+arbitrum_one = "${ARBITRUM_ONE_RPC_URL}"
+robinhood_testnet = "${ROBINHOOD_TESTNET_RPC_URL}"
 
 [etherscan]
 bsc_testnet = { key = "${BSCSCAN_API_KEY}", url = "https://api-testnet.bscscan.com/api" }
+arbitrum_sepolia = { key = "${ARBISCAN_API_KEY}", url = "https://api-sepolia.arbiscan.io/api", chain = 421614 }
+arbitrum_one = { key = "${ARBISCAN_API_KEY}", url = "https://api.arbiscan.io/api", chain = 42161 }
+# Robinhood Chain testnet (46630): Blockscout-style explorer at
+# explorer.testnet.chain.robinhood.com — verify with --verifier blockscout at deploy time.
+robinhood_testnet = { key = "any", url = "https://explorer.testnet.chain.robinhood.com/api", chain = 46630 }

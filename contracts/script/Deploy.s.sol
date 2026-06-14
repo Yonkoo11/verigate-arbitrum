@@ -5,51 +5,64 @@ import {Script, console} from "forge-std/Script.sol";
 import {RWATokenFactory} from "../src/RWATokenFactory.sol";
 import {RWAToken} from "../src/RWAToken.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
+import {VerigateAttester} from "../src/VerigateAttester.sol";
 
-/// @notice Deploy script for BSC Testnet
-/// Usage: forge script script/Deploy.s.sol --rpc-url $BSC_TESTNET_RPC_URL --broadcast --verify
+/// @notice Deploys the Verigate compliance stack and a demo tokenized-stock token.
+///
+/// Attestation source resolution (in priority order):
+///   1. env ATTESTATION_REGISTRY (e.g. canonical EAS on Arbitrum One
+///      0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458) — used as-is.
+///   2. otherwise deploy the bundled VerigateAttester — used on chains without a
+///      canonical registry yet, e.g. Robinhood Chain testnet (chainId 46630).
+///
+/// Usage:
+///   forge script script/Deploy.s.sol --rpc-url $ROBINHOOD_TESTNET_RPC_URL --broadcast
+///   ATTESTATION_REGISTRY=0xbD75... forge script script/Deploy.s.sol --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast
 contract Deploy is Script {
-    // BAS addresses
-    address constant BAS_TESTNET = 0x6c2270298b1e6046898a322acB3Cbad6F99f7CBD;
-    address constant BAS_MAINNET = 0x247Fe62d887bc9410c3848DF2f322e52DA9a51bC;
+    // Canonical EAS deployment (same CREATE2 address across Arbitrum networks).
+    address constant EAS_ARBITRUM = 0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458;
+
+    bytes32 constant KYC_SCHEMA = keccak256("verigate.kyc.v1");
 
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
+        uint256 pk = vm.envUint("DEPLOYER_PRIVATE_KEY");
+        address deployer = vm.addr(pk);
+        address registryOverride = vm.envOr("ATTESTATION_REGISTRY", address(0));
 
-        // Detect chain
-        address basAddress;
-        if (block.chainid == 97) {
-            basAddress = BAS_TESTNET;
-            console.log("Deploying to BSC Testnet");
-        } else if (block.chainid == 56) {
-            basAddress = BAS_MAINNET;
-            console.log("Deploying to BSC Mainnet");
-        } else {
-            revert("Unsupported chain");
-        }
-
+        console.log("Chain id:", block.chainid);
         console.log("Deployer:", deployer);
 
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast(pk);
 
-        // 1. Deploy Factory
-        RWATokenFactory factory = new RWATokenFactory(basAddress);
-        console.log("RWATokenFactory:", address(factory));
+        // 1. Resolve the attestation registry
+        address registry;
+        bool weControlRegistry;
+        if (registryOverride != address(0)) {
+            registry = registryOverride;
+            weControlRegistry = false;
+            console.log("Attestation registry (external):", registry);
+        } else {
+            registry = address(new VerigateAttester(deployer));
+            weControlRegistry = true;
+            console.log("Attestation registry (VerigateAttester, deployed):", registry);
+        }
 
-        // 2. Deploy a demo token with all modules
-        bytes2[] memory blockedCountries = new bytes2[](3);
-        blockedCountries[0] = bytes2("KP"); // North Korea
-        blockedCountries[1] = bytes2("IR"); // Iran
-        blockedCountries[2] = bytes2("SY"); // Syria
+        // 2. Factory
+        RWATokenFactory factory = new RWATokenFactory(registry);
+
+        // 3. Demo tokenized-stock token with country + accredited + max-holder modules
+        bytes2[] memory blocked = new bytes2[](3);
+        blocked[0] = bytes2("KP"); // North Korea
+        blocked[1] = bytes2("IR"); // Iran
+        blocked[2] = bytes2("SY"); // Syria
 
         (address token, address engine) = factory.deploy(
             RWATokenFactory.DeployParams({
-                name: "Verigate Demo Token",
-                symbol: "VGATE",
+                name: "Tokenized TSLA",
+                symbol: "tTSLA",
                 useCountryRestriction: true,
-                countryCheckSender: true,
-                blockedCountries: blockedCountries,
+                countryCheckSender: false,
+                blockedCountries: blocked,
                 useAccreditedInvestor: true,
                 accreditedCheckSender: false,
                 accreditedCheckRecipient: true,
@@ -58,15 +71,24 @@ contract Deploy is Script {
             })
         );
 
-        console.log("RWAToken:", token);
-        console.log("ComplianceEngine:", engine);
-
-        // 3. Mint some tokens to deployer for demo
-        RWAToken(token).mint(deployer, 1_000_000 ether);
-        console.log("Minted 1M tokens to deployer");
+        // 4. If we control the registry, seed a reproducible starting state:
+        //    attest the deployer (US, accredited) and mint demo supply.
+        if (weControlRegistry) {
+            VerigateAttester attester = VerigateAttester(registry);
+            bytes32 deployerUID = attester.attest(
+                KYC_SCHEMA, deployer, 0, true, bytes32(0), abi.encode(uint8(2), bytes2("US"), true, uint8(1), uint64(0))
+            );
+            ComplianceEngine(engine).setAttestationUID(deployer, deployerUID);
+            RWAToken(token).mint(deployer, 1_000_000 ether);
+            console.log("Seeded: deployer attested (US/accredited) + minted 1,000,000 tTSLA");
+        }
 
         vm.stopBroadcast();
 
-        console.log("--- Deployment Complete ---");
+        console.log("=== Verigate deployment ===");
+        console.log("registry :", registry);
+        console.log("factory  :", address(factory));
+        console.log("token    :", token);
+        console.log("engine   :", engine);
     }
 }
