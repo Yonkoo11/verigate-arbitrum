@@ -104,6 +104,9 @@ export default function Landing() {
         </p>
         <div className="hero-cta">
           <Link href="/dashboard" className="btn btn-primary">Launch app</Link>
+          <a className="btn btn-ghost" href="/verigate-arbitrum/covenant-demo.mp4" target="_blank" rel="noopener noreferrer">
+            Watch the demo
+          </a>
           <a className="btn btn-ghost" href={`${CHAIN_EXPLORER}/address/${addresses.rwaToken}`} target="_blank" rel="noopener noreferrer">
             View the live contract
           </a>

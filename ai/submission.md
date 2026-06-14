@@ -34,6 +34,11 @@ Built squarely for the **Robinhood Chain** reserved overall-prize lane (tokenize
 ## Tech
 Solidity (Foundry) · Robinhood Chain (Arbitrum Orbit) + Arbitrum Sepolia · EAS-compatible attestations · Next.js 14 + wagmi v2 frontend · all reads live from the deployed contracts.
 
+## Media (all hosted, no login)
+- **Demo video (60s, live on-chain walkthrough):** https://yonkoo11.github.io/verigate-arbitrum/covenant-demo.mp4
+- **Pitch deck (web):** https://yonkoo11.github.io/verigate-arbitrum/deck/
+- **Pitch deck (PDF, for attachment):** `deck/covenant-deck.pdf`
+
 ---
 ### Submission checklist
 - [x] Public repo + OSI LICENSE (MIT) + README with reproduce steps
@@ -41,6 +46,24 @@ Solidity (Foundry) · Robinhood Chain (Arbitrum Orbit) + Arbitrum Sepolia · EAS
 - [x] Deployed + source-verified on an Arbitrum chain (Robinhood Chain + Arb Sepolia)
 - [x] On-chain proof of the core flow (tx hashes)
 - [x] Security review performed + all findings fixed (97 tests)
-- [ ] 2-minute demo video (Phase 4)
-- [ ] Pitch deck refreshed to Covenant branding (Phase 4)
-- [ ] Submitted on the HackQuest buildathon page (needs your login)
+- [x] Demo video built + hosted (live blocked→verify→settle on the real contracts)
+- [x] Pitch deck (Covenant branding, web + PDF)
+- [ ] **Submitted on the HackQuest buildathon page** (needs your login)
+- [ ] *Optional:* upload the video to YouTube unlisted (some judges prefer an inline player; the Pages mp4 above works as-is)
+
+---
+### HackQuest form — paste-ready fields
+- **Project name:** Covenant
+- **Tagline:** The compliance layer for tokenized stocks.
+- **Short description:** Covenant makes a tokenized equity refuse to move to a wallet that isn't allowed to hold it, and settle instantly once it is. The missing securities-compliance layer for Robinhood Chain and any Arbitrum RWA chain.
+- **Tracks to apply for:** Robinhood Chain (reserved overall lane) + Arbitrum. (Not Best Agentic — Covenant has no agent; do not claim that lane.)
+- **GitHub:** https://github.com/Yonkoo11/verigate-arbitrum
+- **Live demo:** https://yonkoo11.github.io/verigate-arbitrum/
+- **Video:** https://yonkoo11.github.io/verigate-arbitrum/covenant-demo.mp4
+- **Chain / deployment:** Robinhood Chain testnet (46630, Arbitrum Orbit) + Arbitrum Sepolia (421614); 4 source-verified contracts (addresses above).
+- **Tech stack:** Solidity (Foundry), EAS-compatible attestations, Next.js 14 + wagmi v2.
+
+### Only you can do (I can't)
+1. Log in to HackQuest and submit the form with the fields above.
+2. Confirm the exact submission deadline on your dashboard (the public page showed a near-zero countdown).
+3. (Optional) Upload the video to YouTube unlisted and swap that URL into the Video field.
