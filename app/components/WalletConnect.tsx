@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
-import { arbitrumSepolia } from "wagmi/chains";
+import { robinhoodChain } from "@/app/providers";
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -11,12 +11,12 @@ export function WalletConnect() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
-  const wrongChain = isConnected && chainId !== arbitrumSepolia.id;
+  const wrongChain = isConnected && chainId !== robinhoodChain.id;
 
-  // Auto-switch to Arbitrum Sepolia when connected on wrong chain
+  // Auto-switch to Robinhood Chain when connected on wrong chain
   useEffect(() => {
     if (wrongChain && switchChain) {
-      switchChain({ chainId: arbitrumSepolia.id });
+      switchChain({ chainId: robinhoodChain.id });
     }
   }, [wrongChain, switchChain]);
 
@@ -25,14 +25,14 @@ export function WalletConnect() {
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
         {wrongChain && (
           <button
-            onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
+            onClick={() => switchChain({ chainId: robinhoodChain.id })}
             style={{
               fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
               color: "var(--black)", background: "#f59e0b", border: "none",
               padding: "8px 14px", cursor: "pointer", minHeight: 40,
             }}
           >
-            Switch to Arbitrum Sepolia
+            Switch to Robinhood Chain
           </button>
         )}
         <div style={{
@@ -75,7 +75,7 @@ export function WalletConnect() {
 
   return (
     <button
-      onClick={() => connect({ connector: connectors[0], chainId: arbitrumSepolia.id })}
+      onClick={() => connect({ connector: connectors[0], chainId: robinhoodChain.id })}
       disabled={isPending}
       style={{
         fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500,

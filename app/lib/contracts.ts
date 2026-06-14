@@ -5,6 +5,7 @@ import CountryRestrictionABI from "./CountryRestriction.json";
 import AccreditedInvestorABI from "./AccreditedInvestor.json";
 import MaxHoldersABI from "./MaxHolders.json";
 import RWATokenFactoryABI from "./RWATokenFactory.json";
+import VerigateAttesterABI from "./VerigateAttester.json";
 
 export const rwaTokenAbi = RWATokenABI.abi;
 export const complianceEngineAbi = ComplianceEngineABI.abi;
@@ -12,6 +13,7 @@ export const countryRestrictionAbi = CountryRestrictionABI.abi;
 export const accreditedInvestorAbi = AccreditedInvestorABI.abi;
 export const maxHoldersAbi = MaxHoldersABI.abi;
 export const rwaTokenFactoryAbi = RWATokenFactoryABI.abi;
+export const verigateAttesterAbi = VerigateAttesterABI.abi;
 
 // Contract addresses from environment
 export const addresses = {
@@ -21,9 +23,24 @@ export const addresses = {
   countryRestriction: (process.env.NEXT_PUBLIC_COUNTRY_RESTRICTION_ADDRESS ??
     "") as Address,
   factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ?? "") as Address,
+  registry: (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? "") as Address,
 };
 
-// Arbitrum Sepolia chain config
+// Verigate KYC schema id = keccak256("verigate.kyc.v1")
+export const KYC_SCHEMA =
+  "0x56859687772ac9a42520e422b8b1c8547a9391ecf64bfac36d824fd75334c5cd" as const;
+
+// Robinhood Chain testnet (PRIMARY)
+export const ROBINHOOD_CHAIN_ID = 46630;
+export const ROBINHOOD_RPC = "https://rpc.testnet.chain.robinhood.com";
+export const ROBINHOOD_EXPLORER = "https://explorer.testnet.chain.robinhood.com";
+
+// Default chain (the demo points at Robinhood Chain)
+export const CHAIN_ID = ROBINHOOD_CHAIN_ID;
+export const CHAIN_RPC = ROBINHOOD_RPC;
+export const CHAIN_EXPLORER = ROBINHOOD_EXPLORER;
+
+// Arbitrum Sepolia (SECONDARY)
 export const ARB_SEPOLIA_CHAIN_ID = 421614;
 export const ARB_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
 export const ARB_SEPOLIA_EXPLORER = "https://sepolia.arbiscan.io";

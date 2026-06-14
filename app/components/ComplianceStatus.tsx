@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useReadContract } from "wagmi";
-import { addresses, complianceEngineAbi, rwaTokenAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
+import { addresses, complianceEngineAbi, rwaTokenAbi, CHAIN_EXPLORER } from "@/lib/contracts";
 
 const MODULE_ABI = [{ type: "function", name: "moduleInfo", inputs: [], outputs: [{ type: "string", name: "name" }, { type: "string", name: "description" }], stateMutability: "view" }] as const;
 
@@ -33,7 +33,7 @@ function ModuleRow({ address: addr }: { address: string }) {
         )}
       </div>
       <a
-        href={`${ARB_SEPOLIA_EXPLORER}/address/${addr}`}
+        href={`${CHAIN_EXPLORER}/address/${addr}`}
         target="_blank"
         rel="noopener noreferrer"
         style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-3)", textDecoration: "none" }}
@@ -100,7 +100,7 @@ export function ComplianceStatus() {
       </h2>
 
       <div style={{ borderBottom: "1px solid var(--border)", marginBottom: "var(--sp-4)" }}>
-        <StatusRow label="BAS Attestation" ok={!!hasAttestation} text={hasAttestation ? "Verified" : "Not Found"} loading={attLoad} />
+        <StatusRow label="Verigate Attestation" ok={!!hasAttestation} text={hasAttestation ? "Verified" : "Not Found"} loading={attLoad} />
         <StatusRow label="Freeze Status" ok={!isFrozen} text={isFrozen ? "Frozen" : "Active"} loading={frozenLoad} />
       </div>
 

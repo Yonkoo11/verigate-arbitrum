@@ -1,7 +1,8 @@
 "use client";
 
 import { useAccount, useConnect, useChainId, useSwitchChain } from "wagmi";
-import { arbitrumSepolia } from "wagmi/chains";
+import { robinhoodChain } from "@/app/providers";
+import { CHAIN_EXPLORER } from "@/lib/contracts";
 import { TokenDashboard } from "@/components/TokenDashboard";
 import { ComplianceStatus } from "@/components/ComplianceStatus";
 import { TransferForm } from "@/components/TransferForm";
@@ -52,7 +53,7 @@ function GateHero() {
         textAlign: "center",
       }}>
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 500, color: "var(--text-2)", letterSpacing: "0.01em" }}>
-          Compliance middleware for tokenized real-world assets
+          Verigate — Compliance layer for tokenized stocks
         </span>
       </div>
 
@@ -66,12 +67,12 @@ function GateHero() {
           style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
           GitHub
         </a>
-        <a href="https://sepolia.arbiscan.io" target="_blank" rel="noopener noreferrer"
+        <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer"
           style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-          Arbiscan
+          Explorer
         </a>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
-          Built on Arbitrum
+          Built on Robinhood Chain
         </span>
       </div>
 
@@ -94,7 +95,7 @@ function GateHero() {
             All compliance modules passed. EAS attestation verified for both parties.
           </p>
           <button
-            onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: arbitrumSepolia.id })}
+            onClick={() => connectors[0] && connect({ connector: connectors[0], chainId: robinhoodChain.id })}
             style={{ marginTop: 40, fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 500, color: "var(--black)", background: "var(--amber)", border: "none", padding: "14px 32px", cursor: "pointer", minHeight: 48, transition: "opacity var(--duration) var(--ease)" }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
@@ -110,7 +111,7 @@ function GateHero() {
 function WrongChainBanner() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  if (chainId === arbitrumSepolia.id) return null;
+  if (chainId === robinhoodChain.id) return null;
   return (
     <div style={{
       background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.25)",
@@ -118,10 +119,10 @@ function WrongChainBanner() {
       alignItems: "center", justifyContent: "space-between",
     }}>
       <span style={{ fontSize: 14, color: "#f59e0b" }}>
-        You are connected to the wrong network. Switch to Arbitrum Sepolia to use Verigate.
+        You are connected to the wrong network. Switch to Robinhood Chain to use Verigate.
       </span>
       <button
-        onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
+        onClick={() => switchChain({ chainId: robinhoodChain.id })}
         style={{
           fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500,
           color: "var(--black)", background: "#f59e0b", border: "none",
@@ -158,14 +159,14 @@ function Dashboard() {
       {/* Footer */}
       <footer style={{ marginTop: "var(--sp-16)", paddingTop: "var(--sp-6)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--sp-4)" }}>
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 14, color: "var(--text-3)" }}>
-          Verigate — Compliance for tokenized RWA on Arbitrum
+          Verigate — Compliance layer for tokenized stocks · Robinhood Chain
         </span>
         <div style={{ display: "flex", gap: "var(--sp-5)" }}>
           <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
             GitHub
           </a>
-          <a href="https://sepolia.arbiscan.io" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
-            Arbiscan
+          <a href={CHAIN_EXPLORER} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>
+            Explorer
           </a>
         </div>
       </footer>

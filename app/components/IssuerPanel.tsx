@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
-import { parseUnits, isAddress, type Address, toHex } from "viem";
-import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
+import { useEffect, useState } from "react";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, isAddress, type Address, toHex, encodeAbiParameters, decodeEventLog, stringToHex } from "viem";
+import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, verigateAttesterAbi, KYC_SCHEMA, CHAIN_EXPLORER } from "@/lib/contracts";
 import { useToast } from "./Toast";
+
+const ZERO_BYTES32 = "0x0000000000000000000000000000000000000000000000000000000000000000" as const;
+
+// Default-allowed jurisdictions plus a few that the module blocks (for demo).
+const COUNTRY_OPTIONS = ["US", "GB", "DE", "SG", "KP", "IR", "SY"];
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +32,24 @@ function Input({ value, onChange, placeholder, mono = true, style: extra }: { va
         padding: "10px 14px", outline: "none", minHeight: 44, ...extra,
       }}
     />
+  );
+}
+
+function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      style={{
+        width: "100%", fontFamily: "var(--font-mono)", fontSize: 16,
+        color: "var(--text-1)", background: "var(--surface-2)", border: "1px solid var(--border)",
+        padding: "10px 14px", outline: "none", minHeight: 44, appearance: "none" as const,
+      }}
+    >
+      {options.map((o) => (
+        <option key={o} value={o}>{o}</option>
+      ))}
+    </select>
   );
 }
 
@@ -55,7 +78,7 @@ function Btn({ onClick, disabled, children, variant = "primary" }: { onClick: ()
 function TxLink({ hash }: { hash: string | undefined }) {
   if (!hash) return null;
   return (
-    <a href={`${ARB_SEPOLIA_EXPLORER}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
+    <a href={`${CHAIN_EXPLORER}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
       style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--amber)", textDecoration: "none" }}>
       {hash.slice(0, 10)}...{hash.slice(-6)}
     </a>
@@ -82,9 +105,14 @@ export function IssuerPanel() {
   const [mintAmt, setMintAmt] = useState("");
   const { writeContract: wMint, data: mintHash, isPending: mintP } = useWriteContract();
 
-  const [attWallet, setAttWallet] = useState("");
-  const [attUID, setAttUID] = useState("");
-  const { writeContract: wAtt, data: attHash, isPending: attP } = useWriteContract();
+  // Verify Investor: attest on-chain, then map the resulting UID into the engine.
+  const [vWallet, setVWallet] = useState("");
+  const [vCountry, setVCountry] = useState("US");
+  const { writeContract: wAttest, data: attestHash, isPending: attestP, reset: resetAttest } = useWriteContract();
+  const { data: attestReceipt, isLoading: attestConfirming } = useWaitForTransactionReceipt({ hash: attestHash });
+  const { writeContract: wMap, data: mapHash, isPending: mapP } = useWriteContract();
+  const [pendingWallet, setPendingWallet] = useState<Address | null>(null);
+  const [linkedUid, setLinkedUid] = useState(false);
 
   const [freezeAddr, setFreezeAddr] = useState("");
   const { writeContract: wFreeze, data: freezeHash, isPending: freezeP } = useWriteContract();
@@ -98,6 +126,42 @@ export function IssuerPanel() {
   const { data: decimals } = useReadContract({ address: addresses.rwaToken, abi: rwaTokenAbi, functionName: "decimals" });
   const dec = typeof decimals === "number" ? decimals : 18;
 
+  // Once the attest tx confirms, decode the Attested event to get the UID, then map it in the engine.
+  useEffect(() => {
+    if (!attestReceipt || !pendingWallet || linkedUid) return;
+    let uid: `0x${string}` | undefined;
+    for (const log of attestReceipt.logs) {
+      try {
+        const ev = decodeEventLog({ abi: verigateAttesterAbi, data: log.data, topics: log.topics });
+        if (ev.eventName === "Attested") {
+          uid = (ev.args as unknown as { uid: `0x${string}` }).uid;
+          break;
+        }
+      } catch {
+        // not an Attested log from our attester ABI; skip
+      }
+    }
+    // Fallback: Attested uid is the first indexed topic.
+    if (!uid) {
+      const attesterLog = attestReceipt.logs.find(
+        (l) => l.address.toLowerCase() === (addresses.registry as string).toLowerCase() && l.topics[1]
+      );
+      uid = attesterLog?.topics[1] as `0x${string}` | undefined;
+    }
+    if (!uid) {
+      toast("Could not read attestation UID from receipt", "error");
+      return;
+    }
+    setLinkedUid(true);
+    wMap(
+      { address: addresses.complianceEngine, abi: complianceEngineAbi, functionName: "setAttestationUID", args: [pendingWallet, uid] },
+      {
+        onSuccess: () => toast("Investor verified — attestation linked", "success"),
+        onError: (e) => { setLinkedUid(false); toast(e.message.split("\n")[0], "error"); },
+      }
+    );
+  }, [attestReceipt, pendingWallet, linkedUid, wMap, toast]);
+
   if (!isOwner) return null;
 
   function doMint() {
@@ -106,11 +170,21 @@ export function IssuerPanel() {
       { onSuccess: () => toast("Minted", "success"), onError: (e) => toast(e.message.split("\n")[0], "error") });
   }
 
-  function doAtt() {
-    if (!isAddress(attWallet) || !attUID) return;
-    const uid = attUID.startsWith("0x") ? (attUID as `0x${string}`) : (`0x${attUID}` as `0x${string}`);
-    wAtt({ address: addresses.complianceEngine, abi: complianceEngineAbi, functionName: "setAttestationUID", args: [attWallet as Address, uid] },
-      { onSuccess: () => toast("Attestation set", "success"), onError: (e) => toast(e.message.split("\n")[0], "error") });
+  function doVerify() {
+    if (!isAddress(vWallet) || !addresses.registry) return;
+    setLinkedUid(false);
+    setPendingWallet(vWallet as Address);
+    resetAttest();
+    // KYC data = abi.encode(uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry)
+    const countryHex = stringToHex(vCountry, { size: 2 });
+    const data = encodeAbiParameters(
+      [{ type: "uint8" }, { type: "bytes2" }, { type: "bool" }, { type: "uint8" }, { type: "uint64" }],
+      [2, countryHex, true, 1, BigInt(0)]
+    );
+    wAttest(
+      { address: addresses.registry, abi: verigateAttesterAbi, functionName: "attest", args: [KYC_SCHEMA, vWallet as Address, BigInt(0), true, ZERO_BYTES32, data] },
+      { onSuccess: () => toast("Attestation submitted — confirming…", "success"), onError: (e) => { setPendingWallet(null); toast(e.message.split("\n")[0], "error"); } }
+    );
   }
 
   function doFreeze() {
@@ -146,6 +220,9 @@ export function IssuerPanel() {
     } catch { return hex; }
   }
 
+  const verifyBusy = attestP || attestConfirming || mapP;
+  const verifyLabel = attestP ? "Attesting…" : attestConfirming ? "Confirming…" : mapP ? "Linking…" : "Verify";
+
   return (
     <div style={{ background: "var(--surface-1)", border: "1px solid var(--amber-border)", padding: "var(--sp-6)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)", marginBottom: "var(--sp-2)" }}>
@@ -164,13 +241,19 @@ export function IssuerPanel() {
         <div style={{ marginTop: "var(--sp-2)" }}><TxLink hash={mintHash} /></div>
       </Section>
 
-      <Section title="Set Attestation UID">
+      <Section title="Verify Investor">
+        <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: "var(--sp-4)", lineHeight: 1.6 }}>
+          Issues a Verigate KYC attestation on-chain (via the Verigate attester) and links its UID to the wallet in the compliance engine. Blocked jurisdictions (KP, IR, SY) still fail the country module — useful for the demo.
+        </p>
         <div className="admin-row">
-          <div style={{ flex: 1 }}><Label>Wallet</Label><Input value={attWallet} onChange={setAttWallet} placeholder="0x..." /></div>
-          <div style={{ flex: 1 }}><Label>UID (bytes32)</Label><Input value={attUID} onChange={setAttUID} placeholder="0x..." /></div>
-          <Btn onClick={doAtt} disabled={!isAddress(attWallet) || !attUID || attP}>{attP ? "..." : "Set"}</Btn>
+          <div style={{ flex: 1 }}><Label>Wallet</Label><Input value={vWallet} onChange={setVWallet} placeholder="0x..." /></div>
+          <div style={{ width: 120 }}><Label>Country</Label><Select value={vCountry} onChange={setVCountry} options={COUNTRY_OPTIONS} /></div>
+          <Btn onClick={doVerify} disabled={!isAddress(vWallet) || !addresses.registry || verifyBusy}>{verifyLabel}</Btn>
         </div>
-        <div style={{ marginTop: "var(--sp-2)" }}><TxLink hash={attHash} /></div>
+        <div style={{ marginTop: "var(--sp-2)", display: "flex", gap: "var(--sp-4)" }}>
+          {attestHash && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-3)" }}>attest: <TxLink hash={attestHash} /></span>}
+          {mapHash && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-3)" }}>link: <TxLink hash={mapHash} /></span>}
+        </div>
       </Section>
 
       <Section title="Freeze / Unfreeze">

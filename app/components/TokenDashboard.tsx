@@ -2,7 +2,7 @@
 
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
-import { addresses, rwaTokenAbi, ARB_SEPOLIA_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, CHAIN_EXPLORER } from "@/lib/contracts";
 
 export function TokenDashboard() {
   const { address } = useAccount();
@@ -52,9 +52,9 @@ export function TokenDashboard() {
       </div>
 
       <div style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", marginBottom: "var(--sp-1)" }}>
-        {(tokenName as string) ?? "Loading..."}
+        {(tokenName as string) ?? "Tokenized TSLA"}
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text-3)", marginLeft: 8 }}>
-          {(tokenSymbol as string) ?? ""}
+          {(tokenSymbol as string) ?? "tTSLA"}
         </span>
       </div>
 
@@ -84,7 +84,7 @@ export function TokenDashboard() {
         <MetaItem
           label="Compliance Engine"
           value={engine ? `${(engine as string).slice(0, 8)}...${(engine as string).slice(-6)}` : "—"}
-          href={engine ? `${ARB_SEPOLIA_EXPLORER}/address/${engine}` : undefined}
+          href={engine ? `${CHAIN_EXPLORER}/address/${engine}` : undefined}
         />
       </div>
     </Panel>

@@ -5,8 +5,8 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
-  title: "Verigate",
-  description: "Verify before you transfer. Compliance middleware for tokenized RWA on Arbitrum.",
+  title: "Verigate — Compliance layer for tokenized stocks",
+  description: "Verify before you transfer. The compliance layer for tokenized stocks, demoing Tokenized TSLA (tTSLA) on Robinhood Chain.",
   icons: { icon: "/favicon.svg" },
   other: { "theme-color": "#0b0d11" },
 };
