@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAccount, useConnect, useChainId, useSwitchChain } from "wagmi";
 import { robinhoodChain } from "@/app/providers";
 import { CHAIN_EXPLORER } from "@/lib/contracts";
@@ -176,5 +177,10 @@ function Dashboard() {
 
 export default function Home() {
   const { isConnected } = useAccount();
+  // Match the server render (disconnected) on the first client paint, then reveal the
+  // connection-dependent view. Prevents a hydration mismatch when wagmi auto-reconnects.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <GateHero />;
   return isConnected ? <Dashboard /> : <GateHero />;
 }

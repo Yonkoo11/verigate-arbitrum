@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { robinhoodChain } from "@/app/providers";
 
@@ -11,6 +11,12 @@ export function WalletConnect() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
+  // Wallet/connection state isn't known during SSR, so the first client render must
+  // match the server's. Gate connection-dependent UI behind `mounted` to avoid a
+  // React hydration mismatch (wagmi reconnects from storage on the client).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const wrongChain = isConnected && chainId !== robinhoodChain.id;
 
   // Auto-switch to Robinhood Chain when connected on wrong chain
@@ -19,6 +25,22 @@ export function WalletConnect() {
       switchChain({ chainId: robinhoodChain.id });
     }
   }, [wrongChain, switchChain]);
+
+  // Stable placeholder for SSR + first client render (matches server output).
+  if (!mounted) {
+    return (
+      <button
+        disabled
+        style={{
+          fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500,
+          color: "var(--black)", background: "var(--amber)", border: "none",
+          padding: "10px 20px", opacity: 0.5, minHeight: 44, cursor: "not-allowed",
+        }}
+      >
+        Connect Wallet
+      </button>
+    );
+  }
 
   if (isConnected && address) {
     return (
