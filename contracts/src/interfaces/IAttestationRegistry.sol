@@ -4,8 +4,8 @@ pragma solidity ^0.8.24;
 /// @notice On-chain attestation record.
 /// @dev Field order is byte-for-byte identical to the canonical Ethereum Attestation
 ///      Service (EAS) `Attestation` struct (see eas-contracts `Common.sol`). This exact
-///      ordering is what makes Verigate able to read a real EAS deployment (Arbitrum One
-///      `0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458`) and our own `VerigateAttester`
+///      ordering is what makes Covenant able to read a real EAS deployment (Arbitrum One
+///      `0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458`) and our own `CovenantAttester`
 ///      through one interface. BAS (BNB Attestation Service) is itself an EAS fork, so the
 ///      same struct serves BSC as well.
 struct Attestation {
@@ -23,9 +23,9 @@ struct Attestation {
 
 /// @title IAttestationRegistry
 /// @notice Chain-neutral read interface for an EAS-compatible attestation registry.
-/// @dev Verigate reads investor KYC/eligibility attestations through this interface.
+/// @dev Covenant reads investor KYC/eligibility attestations through this interface.
 ///      Implementations: canonical EAS (Arbitrum, Ethereum), BAS (BSC), or the bundled
-///      `VerigateAttester` for chains where no canonical registry is deployed yet
+///      `CovenantAttester` for chains where no canonical registry is deployed yet
 ///      (e.g. Robinhood Chain testnet, chainId 46630). Both function selectors match EAS.
 interface IAttestationRegistry {
     /// @notice Read a single attestation by its UID.

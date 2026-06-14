@@ -5,14 +5,14 @@ import {Script, console} from "forge-std/Script.sol";
 import {RWATokenFactory} from "../src/RWATokenFactory.sol";
 import {RWAToken} from "../src/RWAToken.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
-import {VerigateAttester} from "../src/VerigateAttester.sol";
+import {CovenantAttester} from "../src/CovenantAttester.sol";
 
-/// @notice Deploys the Verigate compliance stack and a demo tokenized-stock token.
+/// @notice Deploys the Covenant compliance stack and a demo tokenized-stock token.
 ///
 /// Attestation source resolution (in priority order):
 ///   1. env ATTESTATION_REGISTRY (e.g. canonical EAS on Arbitrum One
 ///      0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458) — used as-is.
-///   2. otherwise deploy the bundled VerigateAttester — used on chains without a
+///   2. otherwise deploy the bundled CovenantAttester — used on chains without a
 ///      canonical registry yet, e.g. Robinhood Chain testnet (chainId 46630).
 ///
 /// Usage:
@@ -22,7 +22,7 @@ contract Deploy is Script {
     // Canonical EAS deployment (same CREATE2 address across Arbitrum networks).
     address constant EAS_ARBITRUM = 0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458;
 
-    bytes32 constant KYC_SCHEMA = keccak256("verigate.kyc.v1");
+    bytes32 constant KYC_SCHEMA = keccak256("covenant.kyc.v1");
 
     function run() external {
         uint256 pk = vm.envUint("DEPLOYER_PRIVATE_KEY");
@@ -42,9 +42,9 @@ contract Deploy is Script {
             weControlRegistry = false;
             console.log("Attestation registry (external):", registry);
         } else {
-            registry = address(new VerigateAttester(deployer));
+            registry = address(new CovenantAttester(deployer));
             weControlRegistry = true;
-            console.log("Attestation registry (VerigateAttester, deployed):", registry);
+            console.log("Attestation registry (CovenantAttester, deployed):", registry);
         }
 
         // 2. Factory
@@ -74,7 +74,7 @@ contract Deploy is Script {
         // 4. If we control the registry, seed a reproducible starting state:
         //    attest the deployer (US, accredited) and mint demo supply.
         if (weControlRegistry) {
-            VerigateAttester attester = VerigateAttester(registry);
+            CovenantAttester attester = CovenantAttester(registry);
             bytes32 deployerUID = attester.attest(
                 KYC_SCHEMA, deployer, 0, true, bytes32(0), abi.encode(uint8(2), bytes2("US"), true, uint8(1), uint64(0))
             );
@@ -85,7 +85,7 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
 
-        console.log("=== Verigate deployment ===");
+        console.log("=== Covenant deployment ===");
         console.log("registry :", registry);
         console.log("factory  :", address(factory));
         console.log("token    :", token);

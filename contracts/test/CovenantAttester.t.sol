@@ -2,25 +2,25 @@
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
-import {VerigateAttester} from "../src/VerigateAttester.sol";
+import {CovenantAttester} from "../src/CovenantAttester.sol";
 import {IAttestationRegistry, Attestation} from "../src/interfaces/IAttestationRegistry.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
 import {CountryRestriction} from "../src/modules/CountryRestriction.sol";
 import {RWAToken} from "../src/RWAToken.sol";
 
 /// @notice Unit tests for the bundled EAS-compatible attester.
-contract VerigateAttesterTest is Test {
-    VerigateAttester attester;
+contract CovenantAttesterTest is Test {
+    CovenantAttester attester;
 
     address issuer = makeAddr("issuer");
     address kycProvider = makeAddr("kycProvider");
     address alice = makeAddr("alice");
     address outsider = makeAddr("outsider");
 
-    bytes32 constant SCHEMA = keccak256("verigate.kyc.v1");
+    bytes32 constant SCHEMA = keccak256("covenant.kyc.v1");
 
     function setUp() public {
-        attester = new VerigateAttester(issuer);
+        attester = new CovenantAttester(issuer);
     }
 
     // NOTE: encode inline (no external call) so a single vm.prank is not consumed by
@@ -47,13 +47,13 @@ contract VerigateAttesterTest is Test {
 
     function test_attest_unauthorizedReverts() public {
         vm.prank(outsider);
-        vm.expectRevert(abi.encodeWithSelector(VerigateAttester.NotAuthorizedAttester.selector, outsider));
+        vm.expectRevert(abi.encodeWithSelector(CovenantAttester.NotAuthorizedAttester.selector, outsider));
         attester.attest(SCHEMA, alice, 0, true, bytes32(0), _kyc("US", true));
     }
 
     function test_attest_zeroRecipientReverts() public {
         vm.prank(issuer);
-        vm.expectRevert(VerigateAttester.ZeroRecipient.selector);
+        vm.expectRevert(CovenantAttester.ZeroRecipient.selector);
         attester.attest(SCHEMA, address(0), 0, true, bytes32(0), _kyc("US", true));
     }
 
@@ -91,14 +91,14 @@ contract VerigateAttesterTest is Test {
         vm.prank(issuer);
         attester.authorizeAttester(kycProvider);
         vm.prank(kycProvider);
-        vm.expectRevert(abi.encodeWithSelector(VerigateAttester.NotOriginalAttester.selector, uid));
+        vm.expectRevert(abi.encodeWithSelector(CovenantAttester.NotOriginalAttester.selector, uid));
         attester.revoke(uid);
     }
 
     function test_revoke_nonRevocableReverts() public {
         vm.startPrank(issuer);
         bytes32 uid = attester.attest(SCHEMA, alice, 0, false, bytes32(0), _kyc("US", true));
-        vm.expectRevert(abi.encodeWithSelector(VerigateAttester.NotRevocable.selector, uid));
+        vm.expectRevert(abi.encodeWithSelector(CovenantAttester.NotRevocable.selector, uid));
         attester.revoke(uid);
         vm.stopPrank();
     }
@@ -107,7 +107,7 @@ contract VerigateAttesterTest is Test {
         vm.startPrank(issuer);
         bytes32 uid = attester.attest(SCHEMA, alice, 0, true, bytes32(0), _kyc("US", true));
         attester.revoke(uid);
-        vm.expectRevert(abi.encodeWithSelector(VerigateAttester.AlreadyRevoked.selector, uid));
+        vm.expectRevert(abi.encodeWithSelector(CovenantAttester.AlreadyRevoked.selector, uid));
         attester.revoke(uid);
         vm.stopPrank();
     }
@@ -127,11 +127,11 @@ contract VerigateAttesterTest is Test {
     }
 }
 
-/// @notice Full compliance stack running against the REAL VerigateAttester (not a mock).
+/// @notice Full compliance stack running against the REAL CovenantAttester (not a mock).
 ///         This is the exact wiring deployed to Robinhood Chain: a tokenized-stock token
 ///         whose transfers are gated by on-chain KYC attestations.
-contract VerigateAttesterIntegrationTest is Test {
-    VerigateAttester attester;
+contract CovenantAttesterIntegrationTest is Test {
+    CovenantAttester attester;
     ComplianceEngine engine;
     CountryRestriction country;
     RWAToken token;
@@ -142,11 +142,11 @@ contract VerigateAttesterIntegrationTest is Test {
     address carol = makeAddr("carol"); // initially unattested
     address mallory = makeAddr("mallory"); // sanctioned jurisdiction
 
-    bytes32 constant SCHEMA = keccak256("verigate.kyc.v1");
+    bytes32 constant SCHEMA = keccak256("covenant.kyc.v1");
 
     function setUp() public {
         vm.startPrank(issuer);
-        attester = new VerigateAttester(issuer);
+        attester = new CovenantAttester(issuer);
         engine = new ComplianceEngine(address(attester), issuer);
 
         country = new CountryRestriction(issuer, false); // recipient-only check

@@ -4,18 +4,18 @@ pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IAttestationRegistry, Attestation} from "./interfaces/IAttestationRegistry.sol";
 
-/// @title VerigateAttester
+/// @title CovenantAttester
 /// @notice Minimal, EAS-compatible attestation registry for chains where the canonical
 ///         Ethereum Attestation Service is not (yet) deployed — e.g. Robinhood Chain
 ///         testnet (chainId 46630). Implements the same read interface
 ///         (`getAttestation` / `isAttestationValid`) and the same `Attestation` struct
-///         layout as EAS, so the Verigate compliance stack reads it through one interface
+///         layout as EAS, so the Covenant compliance stack reads it through one interface
 ///         and can swap to canonical EAS on Arbitrum One with zero code change.
 /// @dev Unlike permissionless EAS, attestation issuance here is gated to an
 ///      owner-curated set of attesters (real-world KYC providers). This models a
 ///      compliance registry: only vetted providers may certify an investor's
 ///      jurisdiction / accreditation, while reads stay public and composable.
-contract VerigateAttester is IAttestationRegistry, Ownable {
+contract CovenantAttester is IAttestationRegistry, Ownable {
     // --- Storage ---
 
     mapping(bytes32 uid => Attestation) private _attestations;
@@ -68,7 +68,7 @@ contract VerigateAttester is IAttestationRegistry, Ownable {
     // --- Attestation lifecycle ---
 
     /// @notice Issue an attestation about `recipient`.
-    /// @param schema       Schema identifier (free-form; Verigate uses the KYC schema below)
+    /// @param schema       Schema identifier (free-form; Covenant uses the KYC schema below)
     /// @param recipient    The wallet the attestation certifies
     /// @param expirationTime Unix expiry (0 = never expires)
     /// @param revocable    Whether this attestation can later be revoked
@@ -136,7 +136,7 @@ contract VerigateAttester is IAttestationRegistry, Ownable {
 
     // --- Schema helper ---
 
-    /// @notice Encode the Verigate KYC schema payload that the compliance modules decode.
+    /// @notice Encode the Covenant KYC schema payload that the compliance modules decode.
     /// @dev Schema: (uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry).
     ///      Country is ISO 3166-1 alpha-2 (e.g. "US"). Kept in sync with the modules' `abi.decode`.
     function encodeKycData(

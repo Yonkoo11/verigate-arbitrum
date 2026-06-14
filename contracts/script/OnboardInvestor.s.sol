@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Script, console} from "forge-std/Script.sol";
-import {VerigateAttester} from "../src/VerigateAttester.sol";
+import {CovenantAttester} from "../src/CovenantAttester.sol";
 import {ComplianceEngine} from "../src/ComplianceEngine.sol";
 
 /// @notice Issuer primitive: onboard one investor by issuing a KYC attestation and mapping it
@@ -18,11 +18,11 @@ import {ComplianceEngine} from "../src/ComplianceEngine.sol";
 ///   REGISTRY=0x.. ENGINE=0x.. INVESTOR=0x.. COUNTRY=US ACCREDITED=true \
 ///   forge script script/OnboardInvestor.s.sol --rpc-url $RPC --broadcast --slow
 contract OnboardInvestor is Script {
-    bytes32 constant KYC_SCHEMA = keccak256("verigate.kyc.v1");
+    bytes32 constant KYC_SCHEMA = keccak256("covenant.kyc.v1");
 
     function run() external {
         uint256 pk = vm.envUint("DEPLOYER_PRIVATE_KEY");
-        VerigateAttester attester = VerigateAttester(vm.envAddress("REGISTRY"));
+        CovenantAttester attester = CovenantAttester(vm.envAddress("REGISTRY"));
         ComplianceEngine engine = ComplianceEngine(vm.envAddress("ENGINE"));
         address investor = vm.envAddress("INVESTOR");
 
