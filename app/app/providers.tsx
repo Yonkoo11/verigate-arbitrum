@@ -14,7 +14,7 @@ import {
 
 const queryClient = new QueryClient();
 
-// Robinhood Chain testnet — PRIMARY chain for the Verigate demo
+// Robinhood Chain testnet — PRIMARY chain for the Covenant demo
 export const robinhoodChain = defineChain({
   id: ROBINHOOD_CHAIN_ID,
   name: "Robinhood Chain Testnet",

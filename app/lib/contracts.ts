@@ -5,7 +5,7 @@ import CountryRestrictionABI from "./CountryRestriction.json";
 import AccreditedInvestorABI from "./AccreditedInvestor.json";
 import MaxHoldersABI from "./MaxHolders.json";
 import RWATokenFactoryABI from "./RWATokenFactory.json";
-import VerigateAttesterABI from "./VerigateAttester.json";
+import CovenantAttesterABI from "./CovenantAttester.json";
 
 export const rwaTokenAbi = RWATokenABI.abi;
 export const complianceEngineAbi = ComplianceEngineABI.abi;
@@ -13,7 +13,7 @@ export const countryRestrictionAbi = CountryRestrictionABI.abi;
 export const accreditedInvestorAbi = AccreditedInvestorABI.abi;
 export const maxHoldersAbi = MaxHoldersABI.abi;
 export const rwaTokenFactoryAbi = RWATokenFactoryABI.abi;
-export const verigateAttesterAbi = VerigateAttesterABI.abi;
+export const covenantAttesterAbi = CovenantAttesterABI.abi;
 
 // Contract addresses from environment
 export const addresses = {
@@ -26,9 +26,9 @@ export const addresses = {
   registry: (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? "") as Address,
 };
 
-// Verigate KYC schema id = keccak256("verigate.kyc.v1")
+// Covenant KYC schema id = keccak256("covenant.kyc.v1")
 export const KYC_SCHEMA =
-  "0x56859687772ac9a42520e422b8b1c8547a9391ecf64bfac36d824fd75334c5cd" as const;
+  "0xfb4a89a14c77aac2b47fb0af09a36501ec9a789f4afb78002f34ee6f23bea75b" as const;
 
 // Robinhood Chain testnet (PRIMARY)
 export const ROBINHOOD_CHAIN_ID = 46630;

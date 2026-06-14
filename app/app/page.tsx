@@ -17,7 +17,7 @@ function GateHero() {
         <div className="hero-eyebrow">Securities compliance · Robinhood Chain testnet</div>
         <h1 className="hero-title">Compliance, enforced at the token.</h1>
         <p className="hero-sub">
-          Verigate is the on-chain compliance layer for tokenized stocks. A tokenized share
+          Covenant is the on-chain compliance layer for tokenized stocks. A tokenized share
           rejects any transfer to an unverified, sanctioned, or non-accredited wallet, and
           settles instantly for verified ones.
         </p>
@@ -69,7 +69,7 @@ function GateHero() {
         <div className="gate-line">
           <div className="gate-line-bar" />
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--amber)", boxShadow: "0 0 20px rgba(154,107,30,0.30)", zIndex: 1 }} />
-          <span className="gate-label">Verigate</span>
+          <span className="gate-label">Covenant</span>
         </div>
 
         {/* RIGHT: Approved zone */}
@@ -126,7 +126,7 @@ function WrongChainBanner() {
       alignItems: "center", justifyContent: "space-between",
     }}>
       <span style={{ fontSize: 14, color: "#f59e0b" }}>
-        You are connected to the wrong network. Switch to Robinhood Chain to use Verigate.
+        You are connected to the wrong network. Switch to Robinhood Chain to use Covenant.
       </span>
       <button
         onClick={() => switchChain({ chainId: robinhoodChain.id })}
@@ -217,7 +217,7 @@ function Dashboard() {
       {/* Footer */}
       <footer style={{ marginTop: "var(--sp-16)", paddingTop: "var(--sp-6)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--sp-4)" }}>
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 14, color: "var(--text-3)" }}>
-          Verigate — Compliance layer for tokenized stocks · Robinhood Chain
+          Covenant — Compliance layer for tokenized stocks · Robinhood Chain
         </span>
         <div style={{ display: "flex", gap: "var(--sp-5)" }}>
           <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textDecoration: "none" }}>

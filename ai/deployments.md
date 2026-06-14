@@ -1,62 +1,42 @@
-# Verigate Deployments
+# Covenant Deployments
 
-## Arbitrum Sepolia (chainId 421614) — LIVE, proven on-chain
-
+Brand: **Covenant** (formerly Verigate). Contract suite: `CovenantAttester` + RWAToken/ComplianceEngine/Factory/modules.
+KYC schema: `covenant.kyc.v1` = `0xfb4a89a14c77aac2b47fb0af09a36501ec9a789f4afb78002f34ee6f23bea75b`.
 Deployer: `0xf9946775891a24462cD4ec885d0D4E2675C84355`
+
+## Robinhood Chain testnet (chainId 46630) — LIVE + VERIFIED + proven (RESERVED PRIZE CHAIN)
+
+- RPC: `https://rpc.testnet.chain.robinhood.com` · Explorer: https://explorer.testnet.chain.robinhood.com
+
+| Contract | Address |
+|----------|---------|
+| CovenantAttester (registry) | `0x70E72995Eabaf8b920063C8257690084A2387405` |
+| RWATokenFactory | `0x41404B1e68614698af7837b82264A46BAf470923` |
+| RWAToken "Tokenized TSLA" (tTSLA) | `0x477f2a84503d6b8eefae021a5d94d0a8cdb9c74a` |
+| ComplianceEngine | `0x52e21af43035ce398dddd1aa6e75cea3a1f0c776` |
+| CountryRestriction (module) | `0xfD17A992a812c308AaAE97e5C506541AC82e21eb` |
+
+All 4 core contracts **source-verified** on the Robinhood Chain Blockscout explorer (`is_verified: true`).
+
+### On-chain proof of the core flow
+1. **Blocked** (unattested): `canTransfer` → `false, "recipient has no attestation"`
+2. **Attest** investor (US/accredited): tx `0x3026e7393a9ccf31780f26c2e5808da8f87c64ad30dc1b547cf98618a3d55eca`
+   - uid `0x11d77ae7e4d8f1f80a1910eca26dad6489a1f360c90bdb0e013c72fcc5dbaee3`
+3. **Map UID**: tx `0x84f46abcd8ae8670ddeb335b916d033d2844357401590afcf1b04dca374e9df1`
+4. **Transfer succeeds** (100 tTSLA): tx `0x01dcb2525eda220f168aa3b5e41a21f81aed57d4c31fe82e05a3982ad8fe6203` (status 0x1)
+   - investor `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` balance = 100 tTSLA
+
+## Arbitrum Sepolia (chainId 421614) — LIVE (secondary)
+
+| Contract | Address |
+|----------|---------|
+| CovenantAttester (registry) | `0xE8682ca1cE90A6be3BD91A01Bf3e39c19543521A` |
+| RWATokenFactory | `0x68a8809E118E6C778D199e0Dc7586AC88589b708` |
+| RWAToken (tTSLA) | `0x24Fdb5FC17759027E75417882835382C564DED30` |
+| ComplianceEngine | `0x197ABA2FadAF09309175f5fbCbbB4e495F1F82c7` |
+
 Explorer base: https://sepolia.arbiscan.io
 
-| Contract | Address |
-|----------|---------|
-| VerigateAttester (registry) | `0xb300221352f952F53546C191FF4F3ABd6A8cfcB2` |
-| RWATokenFactory | `0xb7aA5e6490E4C9d7643dCf5A363283D9B1a90E09` |
-| RWAToken "Tokenized TSLA" (tTSLA) | `0x2c71154782DEe9989Fa6B1dC859Cd962403C7540` |
-| ComplianceEngine | `0x2B612Bc199457b602Ec72990568Af12a501287Ef` |
-| Modules | CountryRestriction + AccreditedInvestor + MaxHolders (deployed by factory, attached to engine) |
-
-### On-chain proof of the core compliance flow (real tx hashes)
-1. **Blocked** (investor unattested): `canTransfer` → `false, "CountryRestriction: recipient has no attestation"` (view)
-2. **Attest** investor (US / accredited): tx `0xbe7f0c71b2dba678749fd4f83b342abd3aea8e5ee451da0917c7f2343f0888b6`
-   - attestation uid `0xa791ae07be495671e1ba9e35ffc61b1475870cb406575034b3dd65889c6c11b9`
-3. **Map UID** in engine: tx `0xd8b199382f889be9730f20206380fb3246241fa0b997fa2a1b45ca303a4b4c85`
-4. **Transfer succeeds** (100 tTSLA → investor): tx `0xe76d3df15eda5d44bdf5e42d79e6ccb2dc603545ed900077b449cae120cc144c` (status 0x1)
-   - investor `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` balance = 100 tTSLA
-5. **Sanctioned-jurisdiction block** (KYC'd but country = KP): attest tx mapped via `0xc2de5cc7bd9a2769fc72f84ed5921edc371e935684720c387cf4ff473a6151a9`;
-   `canTransfer` → `false, "CountryRestriction: recipient country is restricted"` — i.e. valid KYC is NOT sufficient; jurisdiction is enforced. (This is what static allowlists can't express.)
-
-## Robinhood Chain testnet (chainId 46630) — LIVE, proven on-chain (RESERVED PRIZE CHAIN)
-
-- RPC (verified, returns 0xb626): `https://rpc.testnet.chain.robinhood.com`
-- Explorer: https://explorer.testnet.chain.robinhood.com (Blockscout-style)
-- Faucet: https://faucet.testnet.chain.robinhood.com
-- Deployer: `0xf9946775891a24462cD4ec885d0D4E2675C84355`
-
-| Contract | Address |
-|----------|---------|
-| VerigateAttester (registry) | `0xf35bE6FFEBF91AcC27A78696cf912595C6b08AAA` |
-| RWATokenFactory | `0xd2cad31A080b0daE98d9d6427e500B50bCb92774` |
-| RWAToken "Tokenized TSLA" (tTSLA) | `0x128D9Eb78c93d4f56c21aA1523AB404a952C9DAa` |
-| ComplianceEngine | `0xF492900C1f41C3E0d4bc7aF50A069B24b40A2Ac3` |
-
-All four contracts above are **source-verified** on the Robinhood Chain Blockscout explorer (`is_verified: true`).
-
-### On-chain proof (real tx hashes)
-1. **Blocked** (unattested): `canTransfer` → `false, "recipient has no attestation"`
-2. **Attest** investor (US/accredited): tx `0x5d73531a8e0f1622124af9787b6098ad920a9e092fd0e113f0c9a86cc77b0873`
-   - uid `0x6ddca1285bd28431af9a331a1f6ec597ce4ec88873e62b52a5e481764193fe2f`
-3. **Map UID**: tx `0xfbbe3da2ddc366d3da0af121fe335106d44a1a6255f6e7c3db729d2b41997c2b`
-4. **Transfer succeeds** (100 tTSLA): tx `0xc2468eb3b4f77567e599505b4d88b9c84ffd3098654295e04418f0410d42056f` (status 0x1)
-   - investor `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` balance = 100 tTSLA
-
-## Reusing the issuer onboarding script
-`OnboardInvestor.s.sol` issues + maps a KYC attestation in one run (write-only, broadcasts cleanly):
-```
-REGISTRY=.. ENGINE=.. INVESTOR=0x.. COUNTRY=US ACCREDITED=true \
-  forge script script/OnboardInvestor.s.sol --rpc-url <rpc> --broadcast --slow
-```
-NOTE: do the actual blocked→pass *transfer* proof with `cast` (separately mined txs). forge's
-broadcast pre-simulation can't see an attestation written earlier in the same run, so a script that
-attests then transfers in one run reverts in simulation even though the on-chain logic is correct.
-
-## Notes
-- Contract source verification on Arbiscan pending (needs `ARBISCAN_API_KEY` in env). Robinhood Chain uses a Blockscout explorer (`--verifier blockscout`).
-- Production config can point `ATTESTATION_REGISTRY` at canonical EAS on Arbitrum One (`0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458`) instead of deploying VerigateAttester — the contracts read both through `IAttestationRegistry` (identical EAS struct layout).
+## Deploy notes
+- forge 1.4.4 `forge script --broadcast` rejects Robinhood Chain (46630) with "Chain not supported" (unlisted-chain regression). Workaround used: `forge create` (deploy attester + factory) + `cast send factory.deploy(...)` + `cast` seed/proof. `forge create` needs `--broadcast` placed BEFORE the variadic `--constructor-args`. Arb Sepolia deploys fine via `forge script`.
+- Production config can point `ATTESTATION_REGISTRY` at canonical EAS on Arbitrum One (`0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458`) instead of deploying CovenantAttester — same `IAttestationRegistry` interface (identical EAS struct layout).

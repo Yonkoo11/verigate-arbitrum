@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits, isAddress, type Address, toHex, encodeAbiParameters, decodeEventLog, stringToHex } from "viem";
-import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, verigateAttesterAbi, KYC_SCHEMA, CHAIN_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, complianceEngineAbi, countryRestrictionAbi, covenantAttesterAbi, KYC_SCHEMA, CHAIN_EXPLORER } from "@/lib/contracts";
 import { ZERO_BYTES32 } from "@/lib/credential";
 import { useToast } from "./Toast";
 
@@ -138,7 +138,7 @@ function VerifyInvestor() {
     let uid: `0x${string}` | undefined;
     for (const log of attestReceipt.logs) {
       try {
-        const ev = decodeEventLog({ abi: verigateAttesterAbi, data: log.data, topics: log.topics });
+        const ev = decodeEventLog({ abi: covenantAttesterAbi, data: log.data, topics: log.topics });
         if (ev.eventName === "Attested") {
           uid = (ev.args as unknown as { uid: `0x${string}` }).uid;
           break;
@@ -184,7 +184,7 @@ function VerifyInvestor() {
       [2, countryHex, accredited, 1, BigInt(0)],
     );
     wAttest(
-      { address: addresses.registry, abi: verigateAttesterAbi, functionName: "attest", args: [KYC_SCHEMA, vWallet as Address, BigInt(0), true, ZERO_BYTES32, data] },
+      { address: addresses.registry, abi: covenantAttesterAbi, functionName: "attest", args: [KYC_SCHEMA, vWallet as Address, BigInt(0), true, ZERO_BYTES32, data] },
       { onSuccess: () => toast("Attestation submitted — confirming…", "success"), onError: (e) => { setPendingWallet(null); toast(e.message.split("\n")[0], "error"); } },
     );
   }
@@ -196,7 +196,7 @@ function VerifyInvestor() {
     <Card primary>
       <Heading
         title="Verify investor"
-        blurb="Issue a Verigate KYC attestation on-chain and link it to the wallet in the compliance engine. Blocked jurisdictions (KP, IR, SY) still fail the country module at transfer time."
+        blurb="Issue a Covenant KYC attestation on-chain and link it to the wallet in the compliance engine. Blocked jurisdictions (KP, IR, SY) still fail the country module at transfer time."
       />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 240px", gap: "var(--sp-4)", alignItems: "end", marginBottom: "var(--sp-5)" }} className="issuer-row">

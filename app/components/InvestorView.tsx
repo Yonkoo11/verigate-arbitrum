@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { formatUnits, parseUnits, isAddress, type Address, type Hex } from "viem";
-import { addresses, rwaTokenAbi, complianceEngineAbi, verigateAttesterAbi, CHAIN_EXPLORER } from "@/lib/contracts";
+import { addresses, rwaTokenAbi, complianceEngineAbi, covenantAttesterAbi, CHAIN_EXPLORER } from "@/lib/contracts";
 import { decodeCredential, formatExpiry, shortAddr, ZERO_BYTES32, type DecodedCredential } from "@/lib/credential";
 import { useToast } from "./Toast";
 
@@ -115,7 +115,7 @@ function CredentialCard() {
   const hasUid = typeof uid === "string" && uid !== ZERO_BYTES32;
 
   const { data: att } = useReadContract({
-    address: addresses.registry, abi: verigateAttesterAbi, functionName: "getAttestation",
+    address: addresses.registry, abi: covenantAttesterAbi, functionName: "getAttestation",
     args: hasUid ? [uid as Hex] : undefined,
     query: { enabled: hasUid && !!addresses.registry },
   });
@@ -141,7 +141,7 @@ function CredentialCard() {
       {!verified ? (
         <div style={{ padding: "var(--sp-6) 0", borderTop: "1px solid var(--border)" }}>
           <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", lineHeight: 1.65, maxWidth: 460 }}>
-            This wallet has no Verigate attestation. The issuer must verify it in an allowed
+            This wallet has no Covenant attestation. The issuer must verify it in an allowed
             jurisdiction before it can receive or send tTSLA.
           </p>
         </div>
