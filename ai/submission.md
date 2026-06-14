@@ -1,75 +1,46 @@
-# Verigate — DoraHacks Submission
+# Covenant — Submission
 
-## BUIDL Page Content
+**Tagline:** The compliance layer for tokenized stocks.
 
-### Title
-Verigate — Compliance Middleware for Tokenized RWA on BNB Chain
+**One-liner:** Covenant makes a tokenized equity refuse to move to a wallet that isn't allowed to hold it — and settle instantly once it is. It's the missing securities-compliance layer for Robinhood Chain and any Arbitrum RWA chain.
 
-### One-Liner
-Verify before you transfer. BNB-native compliance layer using BAS attestations for tokenized real-world assets.
+## Links
+- **Live demo (no login):** https://yonkoo11.github.io/verigate-arbitrum/
+- **Repo:** https://github.com/Yonkoo11/verigate-arbitrum
+- **Live on Robinhood Chain testnet (46630)** — 4 source-verified contracts:
+  - CovenantAttester `0x68126baf9f282f91b9080c71aDa7e469d2e5E4D6`
+  - RWAToken (tTSLA) `0x8341dee3cfaab93cf2557176e4ebfd6844933798`
+  - ComplianceEngine `0x4b3ea101e35860a3b995a67d9d1e412da5271cf5`
+  - RWATokenFactory `0x52FB7D121e576D8B0b06dD6fcA6C3D7454e7bf5C`
+  - Explorer: https://explorer.testnet.chain.robinhood.com
+- **Also live on Arbitrum Sepolia (421614).** Full address + tx list: `ai/deployments.md`.
+- **On-chain proof:** transfer blocked → attest (`0x8081abfb…`) → transfer settles (`0x0c2aca5f…`, status 0x1).
 
-### Description (paste into DoraHacks)
+## The problem
+Robinhood Chain exists to host tokenized US equities (TSLA, AMZN). But a tokenized share is a **security** — by law it cannot transfer to an un-KYC'd wallet, a sanctioned jurisdiction, or a non-accredited investor. The chain ships the *assets*; every builder on its $1M developer fund still has to solve *compliance* themselves, and static address allow-lists break the moment a token touches secondary trading or DeFi.
 
-Verigate is a lightweight, open-source compliance middleware for tokenized real-world assets on BNB Chain. It uses the BNB Attestation Service (BAS) for on-chain identity verification, enabling modular transfer restrictions that work for both primary issuance and DeFi composability.
+## The solution
+Covenant enforces KYC / jurisdiction / accreditation rules **at the token itself** via a modular `ComplianceEngine`. Each transfer is gated against on-chain KYC attestations read through `IAttestationRegistry` — whose `Attestation` struct is byte-for-byte identical to the Ethereum Attestation Service, so the same contracts read canonical EAS on Arbitrum One or the bundled `CovenantAttester` on chains where EAS isn't deployed yet (like Robinhood Chain). Valid KYC in the *wrong jurisdiction* is still no transfer — the part allow-lists can't express. ERC-3643-aligned; one-transaction deploy via the factory.
 
-**The Problem**
-BNB Chain has $3B in tokenized RWA but no native compliance standard. Existing projects use simple address whitelisting, which breaks for secondary trading, DeFi collateral, and cross-protocol composability. Meanwhile, Tokeny's ERC-3643 lives on Ethereum and Chainlink ACE is enterprise-grade and chain-agnostic — neither is BNB-native.
+## Why it wins on each judging criterion
+- **Smart contract quality / minimal vulnerabilities:** 97 passing Foundry tests; a 12-agent security audit was run and **all five findings fixed with regression tests** (`ai/security-review.md`) before redeploying; all contracts source-verified on the explorer.
+- **Product-market fit:** the exact gap Robinhood Chain's builder ecosystem leaves open — every tokenized-securities issuer needs this and can't ship without it.
+- **Innovation & creativity:** a *live compliance-gate verdict* (the UI reads `canTransfer` as you type), an on-chain KYC *credential card* decoded from the attestation, and an EAS-compatible attester that works on brand-new chains.
+- **Real problem solving:** securities transfer-restriction is a legal hard requirement, not a nice-to-have.
 
-**The Solution**
-Verigate provides modular compliance modules that check BAS attestations on every token transfer:
+## Reserved-prize alignment
+Built squarely for the **Robinhood Chain** reserved overall-prize lane (tokenized securities = mandatory compliance), and deployed on **Arbitrum** as well. EAS-compatible so it drops onto Arbitrum One mainnet with zero code change.
 
-- **CountryRestriction** — blocks transfers to/from sanctioned jurisdictions
-- **AccreditedInvestor** — verifies accredited investor status
-- **MaxHolders** — caps holder count (SEC Rule 12g-1 compliance)
-
-One schema, one attestation, access to every compliant RWA token on BSC. KYC once, hold anything.
-
-**Architecture**
-- ERC-3643-compatible token with compliance hooks in every transfer
-- ComplianceEngine iterates registered modules, each reads BAS attestations
-- RWATokenFactory deploys compliant tokens with selected modules in one transaction
-- 75 passing Foundry tests, Slither analysis clean, 4 bugs found and fixed via manual audit
-
-**BNB Chain Native**
-- Built on BAS (BNB Attestation Service) — not Chainlink CCID, not ONCHAINID
-- Schema registered on BAS testnet, attestations created and verified on-chain
-- Phase 1 Gate passed: transfer blocked without attestation → attestation added → transfer succeeds
-
-### Links
-
-- **Live Demo:** https://yonkoo11.github.io/verigate/
-- **GitHub:** https://github.com/Yonkoo11/verigate
-- **Factory (verified on BSCScan):** https://testnet.bscscan.com/address/0x60aa769416EfBbc0A6BC9cb454758dE6f76D52B5
-- **Token (VGATE):** https://testnet.bscscan.com/address/0xE7f32bcBCDBBEf25900d5f9545C20CFC2d61A711
-- **ComplianceEngine:** https://testnet.bscscan.com/address/0x5Bf71EEdA3CA10ae52de3eA4aeA4b14b9d0FDba7
-
-### Tags
-RWA, BNB Chain, BAS, Compliance, ERC-3643, Tokenization, DeFi
-
-### Tech Stack
-Solidity 0.8.24, Foundry, OpenZeppelin, BNB Attestation Service, Next.js, wagmi, viem
+## Tech
+Solidity (Foundry) · Robinhood Chain (Arbitrum Orbit) + Arbitrum Sepolia · EAS-compatible attestations · Next.js 14 + wagmi v2 frontend · all reads live from the deployed contracts.
 
 ---
-
-## Google Form Fields (https://forms.gle/t87uDXQFspa8tyq36)
-
-Fill in with:
-- **Project Name:** Verigate
-- **Description:** Compliance middleware for tokenized RWA on BNB Chain using BAS attestations
-- **Website/Demo:** https://yonkoo11.github.io/verigate/
-- **GitHub:** https://github.com/Yonkoo11/verigate
-- **Stage:** Early stage (no TGE, no funding)
-- **Track:** RWA
-- **Deployed on BNB Chain:** Yes (BSC Testnet)
-
----
-
-## Submission Checklist
-
-- [ ] DoraHacks BUIDL page created
-- [ ] Google Form submitted
-- [ ] Pitch deck attached (PDF)
-- [ ] GitHub repo is public
-- [ ] Live demo URL works
-- [ ] Contracts verified on BSCScan
-- [ ] README has setup instructions
+### Submission checklist
+- [x] Public repo + OSI LICENSE (MIT) + README with reproduce steps
+- [x] Live demo URL accessible without login
+- [x] Deployed + source-verified on an Arbitrum chain (Robinhood Chain + Arb Sepolia)
+- [x] On-chain proof of the core flow (tx hashes)
+- [x] Security review performed + all findings fixed (97 tests)
+- [ ] 2-minute demo video (Phase 4)
+- [ ] Pitch deck refreshed to Covenant branding (Phase 4)
+- [ ] Submitted on the HackQuest buildathon page (needs your login)
