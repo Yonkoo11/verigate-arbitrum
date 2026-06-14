@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Covenant — Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --canvas:#F7F3EC; --surface:#FFFFFF; --ink:#1F1B16;
+    --ink-2:rgba(31,27,22,.64); --ink-3:rgba(31,27,22,.48);
+    --gold:#8A5C16; --gold-dim:rgba(154,107,30,.10); --gold-border:rgba(154,107,30,.28);
+    --green:#1E7A52; --red:#BC3B33; --border:rgba(31,27,22,.10);
+    --serif:'Crimson Pro',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#e9e4da;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  .slide{
+    width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;
+    padding:8vh 10vw;position:relative;background:var(--canvas);
+  }
+  .slide.active{display:flex}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:28px}
+  h1{font-family:var(--serif);font-weight:500;letter-spacing:-.02em;line-height:1.04;font-size:clamp(40px,6.4vw,84px)}
+  h2{font-family:var(--serif);font-weight:500;letter-spacing:-.02em;line-height:1.08;font-size:clamp(30px,4.2vw,54px);margin-bottom:28px}
+  .lede{font-size:clamp(18px,2vw,24px);color:var(--ink-2);line-height:1.55;max-width:60ch}
+  .lede strong{color:var(--ink);font-weight:600}
+  ul{list-style:none;margin-top:8px}
+  li{font-size:clamp(16px,1.7vw,21px);color:var(--ink-2);line-height:1.5;padding:12px 0;border-top:1px solid var(--border);display:flex;gap:16px}
+  li b{color:var(--ink);font-weight:600}
+  li .k{font-family:var(--mono);color:var(--gold);font-size:14px;min-width:34px;padding-top:3px}
+  .foot{position:absolute;left:10vw;right:10vw;bottom:5vh;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12px;color:var(--ink-3);border-top:1px solid var(--border);padding-top:14px}
+  .mark{font-family:var(--serif);font-weight:600}
+  .mark b{color:var(--gold)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:12px}
+  .card{background:var(--surface);border:1px solid var(--border);padding:26px;box-shadow:0 1px 2px rgba(31,27,22,.04),0 10px 28px -16px rgba(31,27,22,.12)}
+  .card.gold{border-color:var(--gold-border);box-shadow:0 0 0 1px var(--gold-border),0 16px 40px -18px rgba(154,107,30,.25)}
+  .card h3{font-family:var(--serif);font-weight:500;font-size:22px;margin-bottom:8px}
+  .card p{color:var(--ink-2);font-size:15px;line-height:1.5}
+  .gate{display:flex;align-items:stretch;gap:0;margin-top:18px;border:1px solid var(--border);background:var(--surface)}
+  .gate > div{flex:1;padding:26px}
+  .gate .deny{border-right:1px solid var(--border)}
+  .gate .label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+  .gate .verdict{font-family:var(--serif);font-size:26px;font-weight:500;margin-bottom:8px}
+  .gate .deny .verdict{color:var(--ink-3)}
+  .gate .allow .verdict{color:var(--ink)}
+  .gate small{color:var(--ink-2);font-size:14px;line-height:1.5;display:block}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:4px 10px;margin-top:24px}
+  .stats{display:flex;gap:48px;margin-top:28px;flex-wrap:wrap}
+  .stat .n{font-family:var(--mono);font-size:clamp(28px,4vw,46px);font-weight:500;color:var(--gold);font-variant-numeric:tabular-nums}
+  .stat .l{font-size:14px;color:var(--ink-2);margin-top:4px}
+  .links{margin-top:26px;font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.9}
+  .links a{color:var(--gold);text-decoration:none}
+  .nav{position:fixed;bottom:18px;right:22px;z-index:50;font-family:var(--mono);font-size:12px;color:var(--ink-3);display:flex;gap:14px;align-items:center}
+  .nav button{font-family:var(--mono);font-size:16px;border:1px solid var(--border);background:var(--surface);color:var(--ink);width:32px;height:32px;cursor:pointer}
+  @media print{
+    @page{size:1280px 720px;margin:0}
+    html,body{background:#fff}
+    .slide{display:flex!important;page-break-after:always;width:1280px;height:720px}
+    .nav{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- 1 — Title -->
+<section class="slide active">
+  <div class="eyebrow">Securities compliance · Robinhood Chain · Arbitrum</div>
+  <h1>Compliance,<br>enforced at the token.</h1>
+  <p class="lede" style="margin-top:28px"><strong>Covenant</strong> is the on-chain compliance layer for tokenized stocks. A tokenized share rejects any transfer to an unverified, sanctioned, or non-accredited wallet — and settles instantly for verified ones.</p>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>Arbitrum Open House London Buildathon</span></div>
+</section>
+
+<!-- 2 — Problem -->
+<section class="slide">
+  <div class="eyebrow">The problem</div>
+  <h2>A tokenized stock is a security.<br>It can't move to the wrong hands.</h2>
+  <p class="lede">Robinhood Chain exists to host tokenized US equities — TSLA, AMZN. By law a tokenized share <strong>cannot</strong> transfer to an un-KYC'd wallet, a sanctioned jurisdiction, or (often) a non-accredited investor.</p>
+  <p class="lede" style="margin-top:18px">The chain ships the <strong>assets</strong>. Every builder on its $1M developer fund still has to solve <strong>compliance</strong> — and static allow-lists break the moment a token touches secondary trading or DeFi.</p>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>02</span></div>
+</section>
+
+<!-- 3 — Solution -->
+<section class="slide">
+  <div class="eyebrow">The solution</div>
+  <h2>The compliance layer for tokenized stocks.</h2>
+  <p class="lede">Covenant enforces KYC, jurisdiction, and accreditation rules <strong>at the token itself</strong>. Every transfer is checked against on-chain KYC attestations before it can settle.</p>
+  <div class="grid">
+    <div class="card"><h3>Modular</h3><p>One ComplianceEngine, pluggable rules: jurisdiction, accreditation, holder cap. ERC-3643-aligned.</p></div>
+    <div class="card"><h3>EAS-compatible</h3><p>Reads canonical EAS on Arbitrum One, or a bundled attester on chains where EAS isn't deployed yet — same code.</p></div>
+  </div>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>03</span></div>
+</section>
+
+<!-- 4 — How it works / the gate -->
+<section class="slide">
+  <div class="eyebrow">How it works · the same transfer, two recipients</div>
+  <h2>Valid KYC in the wrong jurisdiction is still no transfer.</h2>
+  <div class="gate">
+    <div class="deny">
+      <div class="label">Without verification</div>
+      <div class="verdict">Transfer reverted</div>
+      <small>Recipient holds no KYC attestation — the token refuses to move. <span style="color:var(--red)">REVERTED · CountryRestriction</span></small>
+    </div>
+    <div class="allow">
+      <div class="label">With verification</div>
+      <div class="verdict">Transfer settles</div>
+      <small>Jurisdiction, accreditation, holder cap all pass — <span style="color:var(--green)">the share moves on-chain.</span></small>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:22px;font-size:18px">That jurisdiction check is the part address allow-lists can't express.</p>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>04</span></div>
+</section>
+
+<!-- 5 — Live & proven -->
+<section class="slide">
+  <div class="eyebrow">Live & proven on-chain</div>
+  <h2>Deployed, verified, and demonstrated.</h2>
+  <ul>
+    <li><span class="k">01</span><span><b>Robinhood Chain testnet</b> — 4 source-verified contracts (CovenantAttester, ComplianceEngine, RWAToken, Factory). Also live on Arbitrum Sepolia.</span></li>
+    <li><span class="k">02</span><span><b>On-chain proof</b> — transfer blocked → attest → transfer settles (status 0x1), all with explorer tx hashes.</span></li>
+    <li><span class="k">03</span><span><b>Live demo</b> — connect a wallet, watch a tokenized TSLA transfer get blocked, verify the investor, watch it pass.</span></li>
+  </ul>
+  <div class="pill">yonkoo11.github.io/verigate-arbitrum</div>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>05</span></div>
+</section>
+
+<!-- 6 — Why it wins -->
+<section class="slide">
+  <div class="eyebrow">Why it wins the room</div>
+  <h2>Built for the judging criteria.</h2>
+  <div class="grid">
+    <div class="card gold"><h3>Smart-contract quality</h3><p>97 Foundry tests · a 12-agent security audit with all findings fixed + regression-tested · verified source.</p></div>
+    <div class="card"><h3>Product-market fit</h3><p>The exact gap Robinhood Chain's builder fund leaves open. Every tokenized-securities issuer needs it.</p></div>
+    <div class="card"><h3>Innovation</h3><p>A live compliance-gate verdict, a decoded KYC credential card, and an EAS-compatible attester for new chains.</p></div>
+    <div class="card"><h3>Real problem</h3><p>Securities transfer-restriction is a legal hard requirement — not a nice-to-have.</p></div>
+  </div>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant</span><span>06</span></div>
+</section>
+
+<!-- 7 — Close -->
+<section class="slide">
+  <div class="eyebrow">The ask</div>
+  <h1 style="font-size:clamp(36px,5.4vw,72px)">Compliance is the<br>unlock for on-chain finance.</h1>
+  <div class="stats">
+    <div class="stat"><div class="n">2</div><div class="l">reserved-prize chains<br>(Robinhood Chain + Arbitrum)</div></div>
+    <div class="stat"><div class="n">97</div><div class="l">passing tests<br>audited + fixed</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">code changes to run<br>on Arbitrum One EAS</div></div>
+  </div>
+  <div class="links">
+    Demo&nbsp; <a href="https://yonkoo11.github.io/verigate-arbitrum/">yonkoo11.github.io/verigate-arbitrum</a><br>
+    Code&nbsp;&nbsp; <a href="https://github.com/Yonkoo11/verigate-arbitrum">github.com/Yonkoo11/verigate-arbitrum</a>
+  </div>
+  <div class="foot"><span class="mark"><b>CV</b> Covenant — Compliance, enforced at the token.</span><span>07</span></div>
+</section>
+
+<div class="nav">
+  <button onclick="go(-1)">‹</button><span id="counter">1 / 7</span><button onclick="go(1)">›</button>
+</div>
+<script>
+  const slides=[...document.querySelectorAll('.slide')];let i=0;
+  function show(n){slides[i].classList.remove('active');i=Math.max(0,Math.min(slides.length-1,n));slides[i].classList.add('active');document.getElementById('counter').textContent=(i+1)+' / '+slides.length;}
+  function go(d){show(i+d);}
+  addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(1);if(e.key==='ArrowLeft')go(-1);});
+</script>
+</body>
+</html>
