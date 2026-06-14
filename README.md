@@ -35,15 +35,15 @@ Attestations are read through `IAttestationRegistry`, whose `Attestation` struct
 ### Robinhood Chain testnet — chainId 46630
 | Contract | Address |
 |---|---|
-| CovenantAttester | [`0x70E72995…87405`](https://explorer.testnet.chain.robinhood.com/address/0x70E72995Eabaf8b920063C8257690084A2387405) |
-| RWAToken (Tokenized TSLA / tTSLA) | [`0x477f2a84…b9c74a`](https://explorer.testnet.chain.robinhood.com/address/0x477f2a84503d6b8eefae021a5d94d0a8cdb9c74a) |
-| ComplianceEngine | [`0x52e21af4…f0c776`](https://explorer.testnet.chain.robinhood.com/address/0x52e21af43035ce398dddd1aa6e75cea3a1f0c776) |
-| RWATokenFactory | [`0x41404B1e…470923`](https://explorer.testnet.chain.robinhood.com/address/0x41404B1e68614698af7837b82264A46BAf470923) |
+| CovenantAttester | [`0x68126baf…5E4D6`](https://explorer.testnet.chain.robinhood.com/address/0x68126baf9f282f91b9080c71aDa7e469d2e5E4D6) |
+| RWAToken (Tokenized TSLA / tTSLA) | [`0x8341dee3…933798`](https://explorer.testnet.chain.robinhood.com/address/0x8341dee3cfaab93cf2557176e4ebfd6844933798) |
+| ComplianceEngine | [`0x4b3ea101…271cf5`](https://explorer.testnet.chain.robinhood.com/address/0x4b3ea101e35860a3b995a67d9d1e412da5271cf5) |
+| RWATokenFactory | [`0x52FB7D12…e7bf5C`](https://explorer.testnet.chain.robinhood.com/address/0x52FB7D121e576D8B0b06dD6fcA6C3D7454e7bf5C) |
 
-All 4 contracts are **source-verified** on the explorer. On-chain proof of the core flow: transfer **blocked** (no attestation) → **attest** ([`0x3026e739…`](https://explorer.testnet.chain.robinhood.com/tx/0x3026e7393a9ccf31780f26c2e5808da8f87c64ad30dc1b547cf98618a3d55eca)) → **transfer succeeds** ([`0x01dcb252…`](https://explorer.testnet.chain.robinhood.com/tx/0x01dcb2525eda220f168aa3b5e41a21f81aed57d4c31fe82e05a3982ad8fe6203)).
+All 4 contracts are **source-verified** on the explorer. On-chain proof of the core flow: transfer **blocked** (no attestation) → **attest** ([`0x8081abfb…`](https://explorer.testnet.chain.robinhood.com/tx/0x8081abfb0fed665b25df3ed074b3da500f76292233ec1b8bbebb2e0992192280)) → **transfer succeeds** ([`0x0c2aca5f…`](https://explorer.testnet.chain.robinhood.com/tx/0x0c2aca5f5ab307d59a4011120bed4d6a9486de36ea5df3cfc26f8040cde5e2bd)).
 
 ### Arbitrum Sepolia — chainId 421614
-tTSLA [`0x24Fdb5FC…4DED30`](https://sepolia.arbiscan.io/address/0x24Fdb5FC17759027E75417882835382C564DED30) · Engine [`0x197ABA2F…1F82c7`](https://sepolia.arbiscan.io/address/0x197ABA2FadAF09309175f5fbCbbB4e495F1F82c7) · Attester [`0xE8682ca1…43521A`](https://sepolia.arbiscan.io/address/0xE8682ca1cE90A6be3BD91A01Bf3e39c19543521A)
+tTSLA [`0x2604e651…d80c9C`](https://sepolia.arbiscan.io/address/0x2604e651c97E5852b7C9A8120150eB2119d80c9C) · Engine [`0x79C2329B…8cf602`](https://sepolia.arbiscan.io/address/0x79C2329BEe1d9FE83a55d65723c8C61f638cf602) · Attester [`0x4d5B1316…F58118`](https://sepolia.arbiscan.io/address/0x4d5B1316367B85a2EaDCCd1c4F1a17A6AcF58118)
 
 Full address + tx list in [`ai/deployments.md`](ai/deployments.md).
 
@@ -58,7 +58,7 @@ Connect an injected wallet on Robinhood Chain testnet. As an investor you'll see
 
 ```bash
 cd contracts
-forge test                    # 91 passing (75 core + 16 attester incl. a full-stack integration test)
+forge test                    # 97 passing (75 core + 16 attester + 6 security-fix regression tests)
 forge script script/Deploy.s.sol --rpc-url https://rpc.testnet.chain.robinhood.com --broadcast --slow
 ```
 The KYC schema is `(uint8 kycLevel, bytes2 country, bool accredited, uint8 investorType, uint64 expiry)`. To use canonical EAS instead of the bundled attester, set `ATTESTATION_REGISTRY=0xbD75f629…c458` before deploying.

@@ -10,30 +10,30 @@ Deployer: `0xf9946775891a24462cD4ec885d0D4E2675C84355`
 
 | Contract | Address |
 |----------|---------|
-| CovenantAttester (registry) | `0x70E72995Eabaf8b920063C8257690084A2387405` |
-| RWATokenFactory | `0x41404B1e68614698af7837b82264A46BAf470923` |
-| RWAToken "Tokenized TSLA" (tTSLA) | `0x477f2a84503d6b8eefae021a5d94d0a8cdb9c74a` |
-| ComplianceEngine | `0x52e21af43035ce398dddd1aa6e75cea3a1f0c776` |
-| CountryRestriction (module) | `0xfD17A992a812c308AaAE97e5C506541AC82e21eb` |
+| CovenantAttester (registry) | `0x68126baf9f282f91b9080c71aDa7e469d2e5E4D6` |
+| RWATokenFactory | `0x52FB7D121e576D8B0b06dD6fcA6C3D7454e7bf5C` |
+| RWAToken "Tokenized TSLA" (tTSLA) | `0x8341dee3cfaab93cf2557176e4ebfd6844933798` |
+| ComplianceEngine | `0x4b3ea101e35860a3b995a67d9d1e412da5271cf5` |
+| CountryRestriction (module) | `0xE077550E3bD210EA9165bDAADdF6ecD7eF52567F` |
 
 All 4 core contracts **source-verified** on the Robinhood Chain Blockscout explorer (`is_verified: true`).
 
 ### On-chain proof of the core flow
 1. **Blocked** (unattested): `canTransfer` → `false, "recipient has no attestation"`
-2. **Attest** investor (US/accredited): tx `0x3026e7393a9ccf31780f26c2e5808da8f87c64ad30dc1b547cf98618a3d55eca`
-   - uid `0x11d77ae7e4d8f1f80a1910eca26dad6489a1f360c90bdb0e013c72fcc5dbaee3`
-3. **Map UID**: tx `0x84f46abcd8ae8670ddeb335b916d033d2844357401590afcf1b04dca374e9df1`
-4. **Transfer succeeds** (100 tTSLA): tx `0x01dcb2525eda220f168aa3b5e41a21f81aed57d4c31fe82e05a3982ad8fe6203` (status 0x1)
+2. **Attest** investor (US/accredited): tx `0x8081abfb0fed665b25df3ed074b3da500f76292233ec1b8bbebb2e0992192280`
+   - uid `0x33ca9ffcb50d8f8eeb8f40982d4cd59f22eb9080d0b11e4b77cf3f6b0961b2a2`
+3. **Map UID**: tx `0xb0121ba1049ac78abe52e8e1ffc92180d05da55f9e654d61baa4e454641a6b7d`
+4. **Transfer succeeds** (100 tTSLA): tx `0x0c2aca5f5ab307d59a4011120bed4d6a9486de36ea5df3cfc26f8040cde5e2bd` (status 0x1)
    - investor `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` balance = 100 tTSLA
 
 ## Arbitrum Sepolia (chainId 421614) — LIVE (secondary)
 
 | Contract | Address |
 |----------|---------|
-| CovenantAttester (registry) | `0xE8682ca1cE90A6be3BD91A01Bf3e39c19543521A` |
-| RWATokenFactory | `0x68a8809E118E6C778D199e0Dc7586AC88589b708` |
-| RWAToken (tTSLA) | `0x24Fdb5FC17759027E75417882835382C564DED30` |
-| ComplianceEngine | `0x197ABA2FadAF09309175f5fbCbbB4e495F1F82c7` |
+| CovenantAttester (registry) | `0x4d5B1316367B85a2EaDCCd1c4F1a17A6AcF58118` |
+| RWATokenFactory | `0xFd5ba528ff12493b14217f274c3a2ED34104a0ca` |
+| RWAToken (tTSLA) | `0x2604e651c97E5852b7C9A8120150eB2119d80c9C` |
+| ComplianceEngine | `0x79C2329BEe1d9FE83a55d65723c8C61f638cf602` |
 
 Explorer base: https://sepolia.arbiscan.io
 

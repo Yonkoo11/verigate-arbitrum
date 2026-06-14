@@ -20,15 +20,15 @@ export const covenantAttesterAbi = CovenantAttesterABI.abi;
 // empty string too). These are public addresses — no secrets.
 export const addresses = {
   rwaToken: (process.env.NEXT_PUBLIC_RWA_TOKEN_ADDRESS ||
-    "0x477f2a84503d6b8eefae021a5d94d0a8cdb9c74a") as Address,
+    "0x8341dee3cfaab93cf2557176e4ebfd6844933798") as Address,
   complianceEngine: (process.env.NEXT_PUBLIC_COMPLIANCE_ENGINE_ADDRESS ||
-    "0x52e21af43035ce398dddd1aa6e75cea3a1f0c776") as Address,
+    "0x4b3ea101e35860a3b995a67d9d1e412da5271cf5") as Address,
   countryRestriction: (process.env.NEXT_PUBLIC_COUNTRY_RESTRICTION_ADDRESS ||
-    "0xfD17A992a812c308AaAE97e5C506541AC82e21eb") as Address,
+    "0xE077550E3bD210EA9165bDAADdF6ecD7eF52567F") as Address,
   factory: (process.env.NEXT_PUBLIC_FACTORY_ADDRESS ||
-    "0x41404B1e68614698af7837b82264A46BAf470923") as Address,
+    "0x52FB7D121e576D8B0b06dD6fcA6C3D7454e7bf5C") as Address,
   registry: (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
-    "0x70E72995Eabaf8b920063C8257690084A2387405") as Address,
+    "0x68126baf9f282f91b9080c71aDa7e469d2e5E4D6") as Address,
 };
 
 // Covenant KYC schema id = keccak256("covenant.kyc.v1")
