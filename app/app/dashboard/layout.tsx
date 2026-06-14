@@ -45,7 +45,7 @@ function WrongNetworkBanner() {
       marginBottom: "var(--sp-6)",
     }}>
       <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--amber)" }}>
-        Wrong network — switch to Robinhood Chain to use Covenant.
+        Wrong network. Switch to Robinhood Chain to use Covenant.
       </span>
       <button onClick={() => switchChain({ chainId: robinhoodChain.id })} className="btn btn-primary btn-sm" style={{ flexShrink: 0 }}>
         Switch network

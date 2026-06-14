@@ -9,13 +9,13 @@ os.makedirs(OUT, exist_ok=True)
 W, H = 1920, 1080
 
 CAPTIONS = {
-    "01-hook": "This is a tokenized Tesla share. It can't move to a wallet that isn't allowed to hold it.",
-    "02-problem": "Tokenized stocks are securities. By law, they can't reach an unverified wallet, a sanctioned country, or a non-accredited investor.",
-    "03-overview": "An issuer runs the whole thing from one console — supply, holders against the regulatory cap, every compliance rule.",
-    "04-registry": "Investors are verified on-chain. Each wallet earns a KYC credential — jurisdiction, accreditation — decoded straight from the chain.",
-    "05-activity": "Every compliance decision is a public record. Each settled transfer, each block, with its reason. Nothing off-chain.",
-    "06-gate": "Send to an unverified wallet, and it reverts. Verify the investor, and the same transfer settles.",
-    "07-close": "Live and source-verified on Robinhood Chain and Arbitrum. Covenant — compliance, enforced at the token.",
+    "01-hook": "A tokenized Tesla share. It only moves to a wallet that's allowed to hold it.",
+    "02-problem": "Tokenized stocks are securities. They can't legally reach a wallet that isn't verified, or one in a sanctioned country.",
+    "03-engine": "Behind it sits a compliance engine. Country rules, accreditation, a holder cap, all enforced on every transfer.",
+    "04-registry": "Investors get verified on-chain. Each wallet earns a KYC credential, its jurisdiction and accreditation read from the chain.",
+    "05-activity": "Every compliance decision is a public record. Each settled transfer, each block, each reason. None of it off-chain.",
+    "06-gate": "Send to an unverified wallet and it reverts, with the reason on-chain. Verify that investor, and the same transfer settles.",
+    "07-close": "Live and source-verified on Robinhood Chain and Arbitrum. Covenant. Compliance, enforced at the token.",
 }
 
 FONT_PATHS = [

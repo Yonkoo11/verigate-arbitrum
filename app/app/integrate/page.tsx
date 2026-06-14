@@ -55,7 +55,7 @@ export default function DocsPage() {
         <H2>Reading canTransfer</H2>
         <P>
           Before settling, the token calls <span className="mono">canTransfer(from, to, amount)</span> on
-          its engine. It returns <span className="mono">(bool compliant, string reason)</span> — a clean
+          its engine. It returns <span className="mono">(bool compliant, string reason)</span>. A clean
           way to preflight a transfer in your UI without sending a transaction.
         </P>
         <Code>{`// viem
@@ -96,7 +96,7 @@ abi.encode(
           <span className="mono"> bytes32</span> UID and emits <span className="mono">Attested(uid,
           recipient, attester, schema)</span>. <span className="mono">revoke(uid)</span> emits
           <span className="mono"> Revoked</span>. This means existing ERC-3643 / EAS tooling can issue
-          and read Covenant credentials without bespoke integration — Covenant just adds the on-transfer
+          and read Covenant credentials without bespoke integration. Covenant just adds the on-transfer
           enforcement layer on top.
         </P>
 

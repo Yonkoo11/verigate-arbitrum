@@ -4,7 +4,7 @@ import { Providers } from "./providers";
 import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
-  title: "Covenant — Compliance layer for tokenized stocks",
+  title: "Covenant · Compliance layer for tokenized stocks",
   description: "Verify before you transfer. The compliance layer for tokenized stocks, demoing Tokenized TSLA (tTSLA) on Robinhood Chain.",
   icons: { icon: "/favicon.svg" },
   other: { "theme-color": "#0b0d11" },

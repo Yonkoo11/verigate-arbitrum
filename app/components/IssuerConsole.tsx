@@ -162,7 +162,7 @@ export function VerifyInvestor() {
       { address: addresses.complianceEngine, abi: complianceEngineAbi, functionName: "setAttestationUID", args: [pendingWallet, uid] },
       {
         onSuccess: () => {
-          toast("Investor verified — attestation linked", "success");
+          toast("Investor verified, attestation linked", "success");
           setDone({ wallet: pendingWallet, country: vCountry, accredited });
         },
         onError: (e) => { setLinkedUid(false); toast(e.message.split("\n")[0], "error"); },
@@ -185,7 +185,7 @@ export function VerifyInvestor() {
     );
     wAttest(
       { address: addresses.registry, abi: covenantAttesterAbi, functionName: "attest", args: [KYC_SCHEMA, vWallet as Address, BigInt(0), true, ZERO_BYTES32, data] },
-      { onSuccess: () => toast("Attestation submitted — confirming…", "success"), onError: (e) => { setPendingWallet(null); toast(e.message.split("\n")[0], "error"); } },
+      { onSuccess: () => toast("Attestation submitted, confirming…", "success"), onError: (e) => { setPendingWallet(null); toast(e.message.split("\n")[0], "error"); } },
     );
   }
 

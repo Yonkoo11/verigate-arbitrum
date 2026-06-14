@@ -4,12 +4,12 @@ DIR=~/Projects/verigate-arbitrum/video/audio
 mkdir -p $DIR
 
 typeset -A CLIPS
-CLIPS[01-hook]="This is a tokenized Tesla share. It can't move to a wallet that isn't allowed to hold it."
-CLIPS[02-problem]="Tokenized stocks are securities. By law, they can't reach an unverified wallet, a sanctioned country, or a non-accredited investor."
-CLIPS[03-overview]="An issuer runs the whole thing from one console. Supply, holders against the regulatory cap, every compliance rule."
-CLIPS[04-registry]="Investors are verified on-chain. Each wallet earns a KYC credential. Jurisdiction, accreditation, decoded straight from the chain."
-CLIPS[05-activity]="And every compliance decision is a public record. Each settled transfer, each block, with its reason. Nothing off-chain."
-CLIPS[06-gate]="Send to an unverified wallet, and it reverts. Verify the investor, and the same transfer settles."
+CLIPS[01-hook]="A tokenized Tesla share. It only moves to a wallet that's allowed to hold it."
+CLIPS[02-problem]="Tokenized stocks are securities. They can't legally reach a wallet that isn't verified, or one in a sanctioned country."
+CLIPS[03-engine]="Behind it sits a compliance engine. Country rules, accreditation, a holder cap, all enforced on every transfer."
+CLIPS[04-registry]="Investors get verified on-chain. Each wallet earns a KYC credential, its jurisdiction and accreditation read straight from the chain."
+CLIPS[05-activity]="Every compliance decision is a public record. Each settled transfer, each block, each reason. None of it off-chain."
+CLIPS[06-gate]="Send to an unverified wallet and it reverts, with the reason on-chain. Verify that investor, and the same transfer settles."
 CLIPS[07-close]="Live and source-verified on Robinhood Chain and Arbitrum. Covenant. Compliance, enforced at the token."
 
 for name in ${(k)CLIPS}; do

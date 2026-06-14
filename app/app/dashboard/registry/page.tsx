@@ -43,7 +43,7 @@ function VerifiedList() {
       {loading ? (
         <LoadingState message="Reading Attested events from the registry…" />
       ) : error ? (
-        <ErrorState message={`${error}. The testnet RPC may be rate-limiting log queries — try again shortly.`} />
+        <ErrorState message={`${error}. The testnet RPC may be rate-limiting log queries. Try again shortly.`} />
       ) : !data || data.length === 0 ? (
         <EmptyState title="No attestations in range" message="No Attested events were found in the recent block window. Verify an investor above to create the first one." />
       ) : (

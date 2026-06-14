@@ -92,7 +92,7 @@ export default function DeployPage() {
     setNewToken(null);
     writeContract(
       { address: addresses.factory, abi: rwaTokenFactoryAbi, functionName: "deploy", args: [params] },
-      { onSuccess: () => toast("Deployment submitted — confirming…", "success"), onError: (e) => toast(e.message.split("\n")[0], "error") },
+      { onSuccess: () => toast("Deployment submitted, confirming…", "success"), onError: (e) => toast(e.message.split("\n")[0], "error") },
     );
   }
 
@@ -109,7 +109,7 @@ export default function DeployPage() {
 
   return (
     <div>
-      <PageHeader title="Deploy" sub="Issue a new compliant RWA token through the Covenant factory. Pick which compliance modules to attach — they're wired into the token at creation." />
+      <PageHeader title="Deploy" sub="Issue a new compliant RWA token through the Covenant factory. Pick which compliance modules to attach. They're wired into the token at creation." />
 
       <Card primary>
         <Heading title="New compliant token" />

@@ -70,7 +70,7 @@ export default function Overview() {
       </div>
       <p className="page-sub">
         {isOwner
-          ? "Issuer view — manage tokens, the verified registry, and compliance rules."
+          ? "Issuer view. Manage tokens, the verified registry, and compliance rules."
           : "The compliance layer for tokenized equity. Verify before you transfer."}
       </p>
 

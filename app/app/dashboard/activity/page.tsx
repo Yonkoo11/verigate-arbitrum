@@ -43,7 +43,7 @@ export default function ActivityPage() {
     <div>
       <PageHeader
         title="Activity"
-        sub="A live, on-chain audit log read straight from the contracts — settled transfers, blocked transfers with their reason, and investor verifications. Nothing here is off-chain."
+        sub="A live, on-chain audit log read straight from the contracts: settled transfers, blocked transfers with their reason, and investor verifications. Nothing here is off-chain."
       />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--sp-4)", flexWrap: "wrap", marginBottom: "var(--sp-6)" }}>
@@ -65,7 +65,7 @@ export default function ActivityPage() {
         {loading ? (
           <LoadingState message="Reading on-chain events…" />
         ) : error ? (
-          <ErrorState message={`${error}. The testnet RPC may be rate-limiting log queries — hit Refresh to retry.`} />
+          <ErrorState message={`${error}. The testnet RPC may be rate-limiting log queries. Hit Refresh to retry.`} />
         ) : filtered.length === 0 ? (
           <EmptyState title="No events in range" message="No matching events were found in the recent block window. Run a transfer or verify an investor to populate the log." />
         ) : (

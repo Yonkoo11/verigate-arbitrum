@@ -8,7 +8,7 @@ export default function CredentialPage() {
     <div>
       <PageHeader
         title="My Credential"
-        sub="Your on-chain KYC attestation, decoded. Jurisdiction, investor type, and the attestation UID — all read live from the registry."
+        sub="Your on-chain KYC attestation, decoded. Jurisdiction, investor type, and the attestation UID, all read live from the registry."
       />
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
         <IdentityStrip />

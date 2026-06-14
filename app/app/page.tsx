@@ -126,10 +126,10 @@ export default function Landing() {
           <div className="section-eyebrow">The problem</div>
           <h2 className="section-title">A tokenized stock is a bearer asset. Securities law is not.</h2>
           <p className="section-lead">
-            Move a tokenized equity to the wrong wallet — an unverified holder, a sanctioned
-            jurisdiction, a non-accredited buyer — and the issuer is the one in breach. Bolt-on
-            allowlists drift out of sync and live off-chain, where they can&apos;t actually stop a
-            transfer. Compliance has to be enforced where settlement happens: in the token itself.
+            Move a tokenized equity to an unverified holder, a sanctioned jurisdiction, or a
+            non-accredited buyer, and the issuer is the one in breach. Bolt-on allowlists drift
+            out of sync and live off-chain, where they can&apos;t actually stop a transfer.
+            Compliance has to be enforced where settlement happens: in the token itself.
           </p>
         </div>
       </section>
@@ -167,7 +167,7 @@ export default function Landing() {
               <div className="lp-step-num">03</div>
               <div style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--text-1)", marginBottom: 8 }}>Attestations decide</div>
               <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-2)", lineHeight: 1.6 }}>
-                Verification comes from on-chain KYC attestations in an EAS-compatible registry — the same primitive ERC-3643 issuers already trust.
+                Verification comes from on-chain KYC attestations in an EAS-compatible registry, the same primitive ERC-3643 issuers already trust.
               </p>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function Landing() {
       {/* FOOTER */}
       <footer className="lp-footer">
         <span style={{ fontFamily: "var(--font-serif)", fontSize: 14, color: "var(--text-3)" }}>
-          Covenant — Compliance layer for tokenized stocks · Robinhood Chain
+          Covenant · Compliance layer for tokenized stocks · Robinhood Chain
         </span>
         <div style={{ display: "flex", gap: "var(--sp-6)" }}>
           <a href="https://github.com/Yonkoo11/verigate-arbitrum" target="_blank" rel="noopener noreferrer" className="mono-link">GitHub</a>

@@ -35,7 +35,7 @@ function AccreditedConfig({ module }: { module?: Address }) {
           <InfoRow label="Check recipient" value={checkRecipient === undefined ? "—" : checkRecipient ? "Required" : "Not required"} />
           <InfoRow label="Module" value={<ExplorerLink path={`/address/${module}`}>{short(module)} ↗</ExplorerLink>} />
           <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-3)", marginTop: "var(--sp-4)", lineHeight: 1.55 }}>
-            Read-only — accreditation rules are fixed when the token is deployed and cannot be changed afterward.
+            Read-only. Accreditation rules are fixed when the token is deployed and cannot be changed afterward.
           </p>
         </div>
       )}
@@ -59,7 +59,7 @@ export default function RulesPage() {
       <Card style={{ marginTop: "var(--sp-8)" }}>
         <Heading title="Holder cap" blurb="The MaxHolders module limits how many distinct wallets can hold the token. A transfer to a new holder reverts once the cap is reached." />
         {!mh ? (
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-3)" }}>This engine has no MaxHolders module — there is no holder cap.</p>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-3)" }}>This engine has no MaxHolders module, so there is no holder cap.</p>
         ) : (
           <div className="metric-grid">
             <MetricCard label="Current holders" value={mh.holderCount.toString()} />
