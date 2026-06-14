@@ -33,6 +33,7 @@ function IdentityStrip() {
         flexWrap: "wrap", gap: "var(--sp-6)",
         background: "var(--surface-1)", border: "1px solid var(--border)",
         padding: "var(--sp-8)",
+        boxShadow: "0 1px 2px rgba(31,27,22,0.04), 0 6px 16px -8px rgba(31,27,22,0.10)",
       }}
     >
       <div>
@@ -126,7 +127,7 @@ function CredentialCard() {
   const verified = hasUid && !!cred;
 
   return (
-    <section style={{ background: "var(--surface-1)", border: "1px solid var(--border)", padding: "var(--sp-8)" }}>
+    <section style={{ background: "var(--surface-1)", border: "1px solid var(--border)", padding: "var(--sp-8)", boxShadow: "0 1px 2px rgba(31,27,22,0.04), 0 6px 16px -8px rgba(31,27,22,0.10)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--sp-6)" }}>
         <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 500, color: "var(--text-1)" }}>
           Your credential
@@ -290,7 +291,7 @@ function TheGate() {
     <section style={{
       background: "var(--surface-1)", border: "1px solid var(--amber-border)",
       padding: "var(--sp-8)", position: "relative",
-      boxShadow: "0 0 0 1px var(--amber-border), 0 24px 70px -28px rgba(201,165,92,0.30)",
+      boxShadow: "0 0 0 1px var(--amber-border), 0 16px 40px -16px rgba(154,107,30,0.20)",
     }}>
       <div style={{ marginBottom: "var(--sp-6)" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.8, marginBottom: "var(--sp-3)" }}>

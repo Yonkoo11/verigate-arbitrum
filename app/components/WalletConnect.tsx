@@ -42,7 +42,7 @@ export function WalletConnect() {
           <button
             onClick={() => switchChain({ chainId: robinhoodChain.id })}
             className="btn btn-primary btn-sm"
-            style={{ color: "var(--black)", background: "#f59e0b" }}
+            style={{ color: "#FFFFFF", background: "#f59e0b" }}
           >
             Switch to Robinhood Chain
           </button>

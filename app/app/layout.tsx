@@ -29,7 +29,7 @@ export default function RootLayout({
                 right: 0,
                 zIndex: 100,
                 height: 56,
-                background: "rgba(11, 13, 17, 0.88)",
+                background: "rgba(247, 243, 236, 0.88)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
                 borderBottom: "1px solid var(--border)",

@@ -42,7 +42,7 @@ input, button, select, textarea { border-radius: 0 !important; }
 /* Press feedback — every button, the #1 "feels real" detail */
 .btn:not(:disabled):active { transform: translateY(1px); }
 
-.btn-primary { background: var(--amber); color: var(--black); }
+.btn-primary { background: var(--amber); color: #FFFFFF; }
 @media (hover: hover) { .btn-primary:not(:disabled):hover { background: var(--amber-hover); } }
 
 .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-strong); }
@@ -58,42 +58,42 @@ input, button, select, textarea { border-radius: 0 !important; }
    ============================================================ */
 .card-primary {
   border-color: var(--amber-border) !important;
-  box-shadow: 0 0 0 1px var(--amber-border), 0 24px 60px -24px var(--amber-glow);
+  box-shadow: 0 0 0 1px var(--amber-border), 0 16px 40px -16px rgba(154, 107, 30, 0.20);
 }
 
 
 :root {
-  /* Surfaces — warm charcoal progression */
-  --black: #0b0d11;
-  --surface-1: #12141a;
-  --surface-2: #1a1d25;
-  --surface-3: #23262f;
-  --surface-4: #2c303b;
+  /* Surfaces — warm bone progression (light institutional canvas) */
+  --canvas:    #F7F3EC;   /* warm bone — page background (was --black) */
+  --surface-1: #FFFFFF;   /* cards / panels (elevated, white) */
+  --surface-2: #F1EBE0;   /* insets: input bg, status boxes, secondary fills */
+  --surface-3: #E7DFD0;   /* deeper inset / scrollbar thumb / chips */
+  --surface-4: #DAD0BD;
 
-  /* Text — warm white, not pure white. All pass WCAG AA on --black */
-  --text-1: #ece6db;                      /* 13.5:1 — primary */
-  --text-2: rgba(236, 230, 219, 0.62);   /* 6.35:1 — secondary */
-  --text-3: rgba(236, 230, 219, 0.50);   /* 4.52:1 — muted (AA pass) */
-  --text-4: rgba(236, 230, 219, 0.40);   /* 3.29:1 — disabled (large text only) */
+  /* Text — warm near-black on bone */
+  --text-1: #1F1B16;                    /* primary */
+  --text-2: rgba(31, 27, 22, 0.64);     /* secondary */
+  --text-3: rgba(31, 27, 22, 0.48);     /* muted */
+  --text-4: rgba(31, 27, 22, 0.36);     /* disabled */
 
-  /* Accent — amber/gold for value only */
-  --amber: #C9A55C;
-  --amber-dim: rgba(201, 165, 92, 0.12);
-  --amber-border: rgba(201, 165, 92, 0.22);
-  --amber-hover: #d4b46a;
-  --amber-glow: rgba(201, 165, 92, 0.09);
+  /* Accent — deeper gold for value only */
+  --amber:        #8A5C16;              /* deeper gold — passes AA on bone for text AND works as a fill with WHITE text */
+  --amber-dim:    rgba(154, 107, 30, 0.10);
+  --amber-border: rgba(154, 107, 30, 0.28);
+  --amber-hover:  #714B12;
+  --amber-glow:   rgba(154, 107, 30, 0.14);
 
   /* Semantic */
-  --green: #34d399;
-  --green-dim: rgba(52, 211, 153, 0.1);
-  --green-border: rgba(52, 211, 153, 0.18);
-  --red: #f87171;
-  --red-dim: rgba(248, 113, 113, 0.1);
-  --red-border: rgba(248, 113, 113, 0.18);
+  --green:        #1E7A52;
+  --green-dim:    rgba(30, 122, 82, 0.10);
+  --green-border: rgba(30, 122, 82, 0.30);
+  --red:          #BC3B33;
+  --red-dim:      rgba(188, 59, 51, 0.08);
+  --red-border:   rgba(188, 59, 51, 0.28);
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.1);
+  --border:        rgba(31, 27, 22, 0.10);
+  --border-strong: rgba(31, 27, 22, 0.16);
 
   /* Typography */
   --font-serif: 'Crimson Pro', Georgia, serif;
@@ -121,7 +121,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--black);
+  background: var(--canvas);
   color: var(--text-1);
   line-height: 1.55;
   min-height: 100vh;
@@ -130,7 +130,7 @@ body {
 
 /* Selection */
 ::selection {
-  background: rgba(201, 165, 92, 0.25);
+  background: var(--amber-dim);
   color: var(--text-1);
 }
 
@@ -230,7 +230,7 @@ input::placeholder {
 
 .gate-hero-denied {
   flex: 0 0 58%;
-  background: var(--black);
+  background: var(--canvas);
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -46,7 +46,7 @@ function Select({ id, value, onChange, options, ariaLabel }: { id?: string; valu
         width: "100%", fontFamily: "var(--font-sans)", fontSize: 16,
         color: "var(--text-1)", background: "var(--surface-2)", border: "1px solid var(--border)",
         padding: "14px 16px", outline: "none", minHeight: 52, appearance: "none" as const,
-        backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23ece6db' stroke-opacity='0.5' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
+        backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%231F1B16' stroke-opacity='0.5' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
         backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
       }}
     >
@@ -91,7 +91,9 @@ function Card({ primary = false, children }: { primary?: boolean; children: Reac
       background: "var(--surface-1)",
       border: `1px solid ${primary ? "var(--amber-border)" : "var(--border)"}`,
       padding: "var(--sp-8)",
-      boxShadow: primary ? "0 0 0 1px var(--amber-border), 0 24px 70px -28px rgba(201,165,92,0.30)" : "none",
+      boxShadow: primary
+        ? "0 0 0 1px var(--amber-border), 0 16px 40px -16px rgba(154,107,30,0.20)"
+        : "0 1px 2px rgba(31,27,22,0.04), 0 6px 16px -8px rgba(31,27,22,0.10)",
     }}>
       {children}
     </section>
@@ -223,7 +225,7 @@ function VerifyInvestor() {
           }}>
             <span style={{
               position: "absolute", top: 3, left: accredited ? 19 : 3, width: 18, height: 18, borderRadius: "50%",
-              background: accredited ? "var(--black)" : "var(--text-3)",
+              background: accredited ? "#FFFFFF" : "var(--text-3)",
               transition: "left var(--duration) var(--ease)",
             }} />
           </span>

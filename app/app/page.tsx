@@ -55,7 +55,7 @@ function GateHero() {
           <p style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 380, lineHeight: 1.6 }}>
             The recipient holds no KYC attestation, so the token refuses to move.
           </p>
-          <div style={{ marginTop: 32, padding: "14px 16px", background: "rgba(255,255,255,0.015)", border: "1px solid var(--border)" }}>
+          <div style={{ marginTop: 32, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
             {[["Status", "REVERTED", true], ["Module", "CountryRestriction", false], ["Reason", "Recipient has no attestation", false]].map(([label, value, isRed], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 24, padding: "7px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label as string}</span>
@@ -68,7 +68,7 @@ function GateHero() {
         {/* GATE LINE */}
         <div className="gate-line">
           <div className="gate-line-bar" />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--amber)", boxShadow: "0 0 20px rgba(201,165,92,0.35)", zIndex: 1 }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--amber)", boxShadow: "0 0 20px rgba(154,107,30,0.30)", zIndex: 1 }} />
           <span className="gate-label">Verigate</span>
         </div>
 
@@ -131,7 +131,7 @@ function WrongChainBanner() {
       <button
         onClick={() => switchChain({ chainId: robinhoodChain.id })}
         className="btn btn-primary btn-sm"
-        style={{ color: "var(--black)", background: "#f59e0b", flexShrink: 0 }}
+        style={{ color: "#FFFFFF", background: "#f59e0b", flexShrink: 0 }}
       >
         Switch Network
       </button>
